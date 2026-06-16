@@ -51,7 +51,7 @@
 
         <!-- CONTENEDOR DE PRODUCTOS -->
         <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden">
-            <!-- Se carga de forma dinámica desde el script productos.js -->
+            <!-- Se carga de forma dinámica -->
         </div>
 
         <!-- MENSAJE DE NO ENCONTRADO -->
@@ -76,71 +76,79 @@
             return urlParams.get(nombre);
         }
 
-        async function cargarDatosDesdeDrive() {
-            // Buscamos el ID del archivo del cliente en la URL
+        async function cargarDatos() {
             const driveId = obtenerParametroUrl('driveId');
             
-            // Si no hay parámetro en la URL, pasamos a modo simulación local para tus pruebas en la PC
+            // Si no hay parámetro, intentamos buscar el productos.js local (modo simulación de tu PC)
             if (!driveId) {
-                console.log("No se detectó ID de Drive en la URL. Cargando modo simulación local...");
-                cargarScriptLocal();
+                console.log("Cargando modo simulación local...");
+                try {
+                    const script = document.createElement('script');
+                    script.src = "productos.js";
+                    script.onload = () => procesarDatos(window.data_catalogo);
+                    script.onerror = () => mostrarError("Falta el archivo 'productos.js' o el parámetro '?driveId=' en la URL.");
+                    document.body.appendChild(script);
+                } catch (e) {
+                    mostrarError("Error en carga de simulación local.");
+                }
                 return;
             }
 
-            // Si hay un ID de Drive, creamos dinámicamente la etiqueta de script apuntando al archivo en su nube
-            // Usamos el enlace de exportación directa que Google Drive permite para archivos públicos
-            const urlDrive = `https://docs.google.com/uc?export=download&id=${driveId}`;
+            // Si hay un ID de Drive, usamos el bypass para CORS y descarga de Google Drive sin restricciones
+            const urlDrive = `https://corsproxy.io/?https://drive.google.com/uc?export=download&id=${driveId}`;
             
             try {
-                const script = document.createElement('script');
-                script.src = urlDrive;
-                script.onload = () => {
-                    procesarDatos();
-                };
-                script.onerror = () => {
-                    mostrarError("No se pudo conectar con el archivo de Google Drive. Verifica que sea público y el ID esté correcto.");
-                };
-                document.body.appendChild(script);
+                const response = await fetch(urlDrive);
+                if (!response.ok) throw new Error("Google Drive rechazó la conexión.");
+                
+                const textoScript = await response.text();
+                
+                // Extraemos el objeto JSON del texto del script 'productos.js' de manera segura
+                // Buscamos lo que hay después del signo de asignación '='
+                const posicionIgual = textoScript.indexOf('=');
+                if (posicionIgual === -1) throw new Error("El formato del archivo productos.js no es válido.");
+                
+                let textoJson = textoScript.substring(posicionIgual + 1).trim();
+                
+                // Si el script termina en punto y coma, lo removemos para que sea JSON puro
+                if (textoJson.endsWith(';')) {
+                    textoJson = textoJson.slice(0, -1);
+                }
+                
+                const data = JSON.parse(textoJson);
+                procesarDatos(data);
+                
             } catch (error) {
-                mostrarError("Error en la petición de datos desde el servidor.");
+                console.error(error);
+                mostrarError("No se pudo leer el archivo de Google Drive. Asegúrate de que el archivo esté compartido públicamente como 'Cualquier persona con el enlace'.");
             }
         }
 
-        // Carga el archivo local para cuando estés probando en tu Windows 11 sin subirlo a internet
-        function cargarScriptLocal() {
-            const script = document.createElement('script');
-            script.src = "productos.js";
-            script.onload = () => {
-                procesarDatos();
-            };
-            script.onerror = () => {
-                mostrarError("Falta el archivo 'productos.js' en la carpeta o el ID de Google Drive en la URL (?driveId=...).");
-            };
-            document.body.appendChild(script);
-        }
-
-        // Procesa la información una vez que el script externo (local o de Drive) se ha cargado en memoria
-        function procesarDatos() {
+        // Procesa la información una vez obtenida de forma local o remota
+        function procesarDatos(data) {
             try {
-                if (typeof data_catalogo !== 'undefined') {
-                    productos = data_catalogo.productos || [];
+                if (data && typeof data === 'object') {
+                    // Si el script de simulación local usó el scope global de window
+                    const datos = data.productos ? data : window.data_catalogo;
                     
-                    if (data_catalogo.tienda) {
-                        document.getElementById('nombre-tienda').textContent = data_catalogo.tienda.toUpperCase();
+                    productos = datos.productos || [];
+                    
+                    if (datos.tienda) {
+                        document.getElementById('nombre-tienda').textContent = datos.tienda.toUpperCase();
                     }
 
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('contenedor-productos').classList.remove('hidden');
                     cargarProductos(productos);
                 } else {
-                    throw new Error("Estructura de datos inválida.");
+                    throw new Error("Datos corruptos.");
                 }
             } catch (error) {
-                mostrarError("Estructura de datos en 'productos.js' incorrecta o variable global no definida.");
+                mostrarError("Estructura de datos en 'productos.js' incorrecta.");
             }
         }
 
-        // Muestra un aviso elegante en pantalla si algo falla
+        // Muestra el aviso visual de error en pantalla
         function mostrarError(mensajeDetallado) {
             document.getElementById('loading').innerHTML = `
                 <div class="text-rose-500 py-6 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 max-w-md mx-auto">
@@ -150,7 +158,7 @@
                 </div>`;
         }
 
-        // Renderiza las tarjetas de productos en una cuadrícula (grid)
+        // Renderiza los productos en pantalla
         function cargarProductos(lista) {
             const contenedor = document.getElementById('contenedor-productos');
             const sinResultados = document.getElementById('sin-resultados');
@@ -170,7 +178,6 @@
 
                 const tarjeta = `
                     <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all duration-200">
-                        <!-- Contenedor de la Imagen con Fallback automático si falla el enlace -->
                         <div class="relative bg-slate-50 h-36 flex items-center justify-center overflow-hidden">
                             <img src="${prod.foto}" alt="${prod.detalle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
                         </div>
@@ -190,7 +197,6 @@
             });
         }
 
-        // Buscador instantáneo local que no consume megas del servidor
         function filtrarProductos() {
             const texto = document.getElementById('buscador').value.toLowerCase();
             const filtrados = productos.filter(p => 
@@ -200,8 +206,7 @@
             cargarProductos(filtrados);
         }
 
-        // Arrancar carga de datos
-        window.onload = cargarDatosDesdeDrive;
+        window.onload = cargarDatos;
     </script>
 </body>
 </html>
