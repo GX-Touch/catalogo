@@ -4,34 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo Digital | GX-Cloud</title>
-    <!-- Tailwind CSS para diseño moderno y fluido -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Iconos Font-Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { font-family: 'DM Sans', sans-serif; background-color: #f1f5f9; }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 pb-20">
 
-    <!-- ENCABEZADO CON COLORES GX-CLOUD (Morado Profundo) -->
     <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md border-b-4 border-[#8b5cf6]">
         <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col gap-3">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 id="nombre-tienda" class="text-2xl font-bold tracking-tight text-white">MI TIENDA GX-CLOUD</h1>
-                    <p class="text-xs text-violet-200">Inventario Sincronizado en Tiempo Real</p>
+                    <h1 id="nombre-tienda" class="text-2xl font-bold tracking-tight text-white">CARGANDO...</h1>
+                    <p id="contacto-tienda" class="text-xs text-violet-200">Sincronizando datos...</p>
                 </div>
-                <!-- Badge de Estado En Línea -->
-                <span class="bg-[#8b5cf6] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm animate-pulse">
-                    ● EN LÍNEA
-                </span>
+                <span class="bg-[#8b5cf6] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm animate-pulse">● EN LÍNEA</span>
             </div>
             
-            <!-- BUSCADOR CON DISEÑO PREMIUM -->
             <div class="relative mt-1">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-violet-400">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -43,34 +36,32 @@
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-6">
-        <!-- ESTADO DE CARGA -->
         <div id="loading" class="text-center py-12">
             <i class="fa-solid fa-circle-notch animate-spin text-4xl text-[#2e1065] mb-3"></i>
-            <p class="text-slate-500 font-medium">Cargando inventario actualizado...</p>
+            <p class="text-slate-500 font-medium">Cargando inventario...</p>
         </div>
 
-        <!-- CONTENEDOR DE PRODUCTOS -->
-        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden">
-            <!-- Se carga de forma dinámica -->
-        </div>
+        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden"></div>
 
-        <!-- MENSAJE DE NO ENCONTRADO -->
         <div id="sin-resultados" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
             <i class="fa-solid fa-box-open text-slate-300 text-5xl mb-3"></i>
             <p class="text-slate-600 font-medium">No encontramos productos que coincidan.</p>
         </div>
     </main>
 
-    <!-- FOOTER GRIS OSCURO -->
+    <!-- BOTÓN FLOTANTE DE CONTACTO GENERAL -->
+    <a id="btn-whatsapp-general" href="#" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 transition-all z-50">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+    </a>
+
     <footer class="bg-slate-950 text-slate-400 text-center py-8 text-xs mt-12 border-t border-slate-800">
         <p class="mb-1">© 2026 Powered by <span class="text-[#8b5cf6] font-bold">GX-TOUCH</span> Systems</p>
-        <p class="text-[10px] text-slate-600">Conexión directa segura vía GX-Cloud Sync</p>
     </footer>
 
     <script>
         let productos = [];
+        let numWhatsApp = "584120000000"; // Este número se actualizará con el JSON
 
-        // Función para leer los parámetros de la URL (?serial=nombre_cliente)
         function obtenerParametroUrl(nombre) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(nombre);
@@ -78,154 +69,76 @@
 
         async function cargarDatos() {
             const serialCliente = obtenerParametroUrl('serial');
-            
-            // MODO 1: SIMULACIÓN LOCAL (Si no hay serial en la URL, busca productos.js local)
             if (!serialCliente) {
-                console.log("Cargando modo de prueba local...");
-                const script = document.createElement('script');
-                script.src = "productos.js";
-                script.onload = () => procesarDatos(window.data_catalogo);
-                script.onerror = () => mostrarError(
-                    "Sincronización local pendiente.",
-                    "Si estás probando de forma local, recuerda tener el archivo 'productos.js' en la misma carpeta. Si estás en producción, accede usando tu link con serial, ej: ?serial=demo"
-                );
-                document.body.appendChild(script);
+                mostrarError("Error de Acceso", "No se ha especificado un serial.");
                 return;
             }
 
-            // MODO 2: PRODUCCIÓN MULTI-TENANT (Busca la carpeta 'data/[SERIAL].js' de forma relativa en GitHub)
-            const urlDatosRemotos = `data/${serialCliente.toLowerCase()}.js`;
-            console.log(`Buscando catálogo del cliente: ${serialCliente} en la ruta: ${urlDatosRemotos}`);
-            
+            const urlDatosRemotos = `data/${serialCliente.toLowerCase()}.js?t=${new Date().getTime()}`;
             try {
-                // Hacemos una petición directa (sin proxies, sin bloqueos porque está en tu mismo hosting de GitHub)
                 const response = await fetch(urlDatosRemotos);
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        throw new Error(`El catálogo del serial '${serialCliente}' aún no ha sido creado o subido por el sistema GX-TOUCH.`);
-                    }
-                    throw new Error(`Error de servidor: ${response.status}`);
-                }
-                
                 const textoScript = await response.text();
                 procesarTextoDeScript(textoScript);
-                
             } catch (error) {
-                console.error(error);
-                mostrarError(
-                    `No se pudo sincronizar el inventario de la tienda '${serialCliente.toUpperCase()}'.`,
-                    error.message
-                );
+                mostrarError("Error de sincronización", error.message);
             }
         }
 
-        // Extrae el objeto JSON del formato "const data_catalogo = { ... }"
         function procesarTextoDeScript(textoScript) {
             const posicionIgual = textoScript.indexOf('=');
-            if (posicionIgual === -1) {
-                throw new Error("El archivo de datos no tiene la cabecera válida de GX-Cloud.");
-            }
-            
             let textoJson = textoScript.substring(posicionIgual + 1).trim();
-            
-            // Limpiamos punto y coma final
-            if (textoJson.endsWith(';')) {
-                textoJson = textoJson.slice(0, -1);
-            }
+            if (textoJson.endsWith(';')) textoJson = textoJson.slice(0, -1);
             
             const data = JSON.parse(textoJson);
             procesarDatos(data);
         }
 
-        // Procesa la información estructurada
         function procesarDatos(data) {
-            try {
-                if (data && typeof data === 'object') {
-                    const datos = data.productos ? data : window.data_catalogo;
-                    
-                    if (!datos || !datos.productos) {
-                        throw new Error("El archivo de datos no contiene una lista de productos válida.");
-                    }
-
-                    productos = datos.productos || [];
-                    
-                    if (datos.tienda) {
-                        document.getElementById('nombre-tienda').textContent = datos.tienda.toUpperCase();
-                    }
-
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('contenedor-productos').classList.remove('hidden');
-                    cargarProductos(productos);
-                } else {
-                    throw new Error("Estructura de datos corrupta.");
-                }
-            } catch (error) {
-                mostrarError("Error al procesar el inventario.", error.message);
-            }
+            productos = data.productos || [];
+            numWhatsApp = data.telefono_ws || numWhatsApp; // Carga el num del JSON
+            
+            document.getElementById('nombre-tienda').textContent = data.tienda || "TIENDA";
+            document.getElementById('contacto-tienda').textContent = "WhatsApp: " + numWhatsApp;
+            
+            // Configurar botón flotante general
+            document.getElementById('btn-whatsapp-general').href = `https://wa.me/${numWhatsApp}?text=Hola, quiero consultar sobre productos del catálogo.`;
+            
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('contenedor-productos').classList.remove('hidden');
+            cargarProductos(productos);
         }
 
-        // Muestra el aviso visual de error en pantalla
-        function mostrarError(mensajeDetallado, errorTecnico = "") {
-            document.getElementById('loading').innerHTML = `
-                <div class="text-rose-500 py-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 max-w-md mx-auto text-center">
-                    <i class="fa-solid fa-circle-exclamation text-4xl mb-3 text-rose-500"></i>
-                    <p class="font-bold text-lg text-slate-800">Sincronización Pendiente</p>
-                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">${mensajeDetallado}</p>
-                    ${errorTecnico ? `
-                    <div class="mt-4 text-left">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Detalle técnico:</span>
-                        <div class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100 font-mono break-all leading-normal">
-                            ${errorTecnico}
-                        </div>
-                    </div>` : ''}
-                </div>`;
-        }
-
-        // Renderiza los productos en pantalla
         function cargarProductos(lista) {
             const contenedor = document.getElementById('contenedor-productos');
-            const sinResultados = document.getElementById('sin-resultados');
-            
             contenedor.innerHTML = "";
-            if (lista.length === 0) {
-                sinResultados.classList.remove('hidden');
-                return;
-            }
-            sinResultados.classList.add('hidden');
-
             lista.forEach(prod => {
-                const tieneStock = prod.stock > 0;
-                const badgeStock = tieneStock 
-                    ? `<span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Disponible: ${prod.stock}</span>`
-                    : `<span class="text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">Agotado</span>`;
+                const mensajeWS = `Hola, me interesa el producto: *${prod.detalle}* (Cód: ${prod.codigo}). ¿Aún tienen disponible?`;
+                const linkWS = `https://wa.me/${numWhatsApp}?text=${encodeURIComponent(mensajeWS)}`;
 
-                const tarjeta = `
-                    <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all duration-200">
-                        <div class="relative bg-slate-50 h-36 flex items-center justify-center overflow-hidden">
-                            <img src="${prod.foto}" alt="${prod.detalle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
-                        </div>
-                        <div class="p-3.5 flex flex-col flex-grow justify-between gap-3">
+                contenedor.innerHTML += `
+                    <div class="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden flex flex-col">
+                        <img src="${prod.foto}" class="h-32 w-full object-cover" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
+                        <div class="p-3 flex-grow flex flex-col justify-between">
                             <div>
-                                <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">${prod.codigo}</p>
-                                <h3 class="text-sm font-medium text-slate-800 line-clamp-2 leading-tight">${prod.detalle}</h3>
+                                <p class="text-[10px] font-bold text-slate-400">${prod.codigo}</p>
+                                <h3 class="text-sm font-medium line-clamp-2">${prod.detalle}</h3>
+                                <p class="text-lg font-bold text-[#2e1065] mt-1">$${parseFloat(prod.precio).toFixed(2)}</p>
                             </div>
-                            <div class="pt-2 border-t border-slate-100 flex flex-col gap-1.5">
-                                <span class="text-base font-bold text-[#2e1065]">$${parseFloat(prod.precio).toFixed(2)}</span>
-                                ${badgeStock}
-                            </div>
+                            <a href="${linkWS}" target="_blank" class="mt-3 w-full bg-emerald-50 text-emerald-700 text-xs font-bold py-2 rounded-lg text-center hover:bg-emerald-100 transition-colors">
+                                <i class="fa-brands fa-whatsapp mr-1"></i> Consultar
+                            </a>
                         </div>
-                    </div>
-                `;
-                contenedor.innerHTML += tarjeta;
+                    </div>`;
             });
         }
 
+        function mostrarError(titulo, detalle) {
+            document.getElementById('loading').innerHTML = `<div class="p-6 text-rose-500 font-bold">${titulo}<br><span class="text-sm">${detalle}</span></div>`;
+        }
+
         function filtrarProductos() {
-            const text = document.getElementById('buscador').value.toLowerCase();
-            const filtrados = productos.filter(p => 
-                p.detalle.toLowerCase().includes(text) || 
-                p.codigo.toLowerCase().includes(text)
-            );
+            const texto = document.getElementById('buscador').value.toLowerCase();
+            const filtrados = productos.filter(p => p.detalle.toLowerCase().includes(texto) || p.codigo.toLowerCase().includes(texto));
             cargarProductos(filtrados);
         }
 
@@ -233,3 +146,16 @@
     </script>
 </body>
 </html>
+```
+
+### ¿Cómo aprovechar esto en tu sistema?
+Ahora, cuando tu VB6 genere el archivo `js` para cada cliente, asegúrate de incluir el campo `"telefono_ws"` para que todo se automatice:
+
+```javascript
+const data_catalogo = {
+  "tienda": "REPUESTOS EL RAYO",
+  "telefono_ws": "584121234567",  // <--- Solo números, sin espacios ni símbolos
+  "productos": [
+     ...
+  ]
+};
