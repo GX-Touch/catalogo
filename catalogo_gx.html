@@ -46,7 +46,7 @@
         <!-- ESTADO DE CARGA -->
         <div id="loading" class="text-center py-12">
             <i class="fa-solid fa-circle-notch animate-spin text-4xl text-[#2e1065] mb-3"></i>
-            <p class="text-slate-500 font-medium">Conectando con la base de datos de Google Drive...</p>
+            <p class="text-slate-500 font-medium">Cargando inventario actualizado...</p>
         </div>
 
         <!-- CONTENEDOR DE PRODUCTOS -->
@@ -64,107 +64,87 @@
     <!-- FOOTER GRIS OSCURO -->
     <footer class="bg-slate-950 text-slate-400 text-center py-8 text-xs mt-12 border-t border-slate-800">
         <p class="mb-1">© 2026 Powered by <span class="text-[#8b5cf6] font-bold">GX-TOUCH</span> Systems</p>
-        <p class="text-[10px] text-slate-600">Conexión directa segura vía Google Drive API</p>
+        <p class="text-[10px] text-slate-600">Conexión directa segura vía GX-Cloud Sync</p>
     </footer>
 
     <script>
         let productos = [];
 
-        // Función para leer los parámetros de la URL (?driveId=TU_ID_DE_GOOGLE_DRIVE)
+        // Función para leer los parámetros de la URL (?serial=nombre_cliente)
         function obtenerParametroUrl(nombre) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(nombre);
         }
 
         async function cargarDatos() {
-            const driveId = obtenerParametroUrl('driveId');
+            const serialCliente = obtenerParametroUrl('serial');
             
-            // Si no hay parámetro, intentamos buscar el productos.js local (modo simulación de tu PC)
-            if (!driveId) {
-                console.log("Cargando modo simulación local...");
-                try {
-                    const script = document.createElement('script');
-                    script.src = "productos.js";
-                    script.onload = () => procesarDatos(window.data_catalogo);
-                    script.onerror = () => mostrarError(
-                        "Falta el archivo 'productos.js' en esta carpeta o necesitas pasar el parámetro '?driveId=' en la URL para leer desde internet.",
-                        "Modo simulación local activo. Asegúrate de que productos.js exista al lado de este archivo."
-                    );
-                    document.body.appendChild(script);
-                } catch (e) {
-                    mostrarError("Error crítico de inicialización local.", e.message);
-                }
+            // MODO 1: SIMULACIÓN LOCAL (Si no hay serial en la URL, busca productos.js local)
+            if (!serialCliente) {
+                console.log("Cargando modo de prueba local...");
+                const script = document.createElement('script');
+                script.src = "productos.js";
+                script.onload = () => procesarDatos(window.data_catalogo);
+                script.onerror = () => mostrarError(
+                    "Sincronización local pendiente.",
+                    "Si estás probando de forma local, recuerda tener el archivo 'productos.js' en la misma carpeta. Si estás en producción, accede usando tu link con serial, ej: ?serial=demo"
+                );
+                document.body.appendChild(script);
                 return;
             }
 
-            // Enlace original limpio de Google Drive
-            const urlOriginalDrive = `https://drive.google.com/uc?export=download&id=${driveId}`;
+            // MODO 2: PRODUCCIÓN MULTI-TENANT (Busca la carpeta 'data/[SERIAL].js' de forma relativa en GitHub)
+            const urlDatosRemotos = `data/${serialCliente.toLowerCase()}.js`;
+            console.log(`Buscando catálogo del cliente: ${serialCliente} en la ruta: ${urlDatosRemotos}`);
             
-            // Rotación inteligente de pasarelas alternativas optimizadas para evadir bloqueos de Adblockers y CORS
-            const proxies = [
-                // 1. AllOrigins (Ultra-estable, sin la palabra "proxy" en el nombre del dominio)
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(urlOriginalDrive)}`,
-                // 2. Google Focus Proxy (Pertenece a Google, nunca es bloqueado por navegadores o Adblockers)
-                `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=1&url=${encodeURIComponent(urlOriginalDrive)}`,
-                // 3. Codetabs CORS Bypass (Excelente balance de carga y velocidad)
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(urlOriginalDrive)}`
-            ];
-
-            let exito = false;
-            let ultimoError = "";
-
-            // Bucle de reintentos con diferentes servidores de confianza
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    console.log(`Intentando conectar mediante Servidor Enlace ${i + 1}...`);
-                    const response = await fetch(proxies[i]);
-                    
-                    if (!response.ok) {
-                        throw new Error(`El servidor de enlace ${i + 1} respondió con código: ${response.status}`);
+            try {
+                // Hacemos una petición directa (sin proxies, sin bloqueos porque está en tu mismo hosting de GitHub)
+                const response = await fetch(urlDatosRemotos);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`El catálogo del serial '${serialCliente}' aún no ha sido creado o subido por el sistema GX-TOUCH.`);
                     }
-                    
-                    const textoScript = await response.text();
-                    
-                    // Extraemos el objeto JSON de la estructura 'const data_catalogo = { ... }'
-                    const posicionIgual = textoScript.indexOf('=');
-                    if (posicionIgual === -1) {
-                        throw new Error("El archivo descargado no tiene la asignación 'data_catalogo = ' al principio.");
-                    }
-                    
-                    let textoJson = textoScript.substring(posicionIgual + 1).trim();
-                    
-                    // Limpiamos punto y coma final si existe
-                    if (textoJson.endsWith(';')) {
-                        textoJson = textoJson.slice(0, -1);
-                    }
-                    
-                    const data = JSON.parse(textoJson);
-                    procesarDatos(data);
-                    exito = true;
-                    break; // Salimos del bucle si logramos cargar con éxito
-                    
-                } catch (error) {
-                    console.warn(`Fallo en el intento con Enlace ${i + 1}:`, error.message);
-                    ultimoError = error.message;
+                    throw new Error(`Error de servidor: ${response.status}`);
                 }
-            }
-
-            if (!exito) {
+                
+                const textoScript = await response.text();
+                procesarTextoDeScript(textoScript);
+                
+            } catch (error) {
+                console.error(error);
                 mostrarError(
-                    "No se pudo sincronizar el inventario. Asegúrate de que el archivo 'productos.js' en Google Drive esté compartido como 'Cualquier persona con el enlace' (Público) y que no tengas bloqueadores de red estrictos en el navegador.",
-                    `Detalles de todos los intentos fallidos: ${ultimoError}`
+                    `No se pudo sincronizar el inventario de la tienda '${serialCliente.toUpperCase()}'.`,
+                    error.message
                 );
             }
         }
 
-        // Procesa la información una vez obtenida de forma local o remota
+        // Extrae el objeto JSON del formato "const data_catalogo = { ... }"
+        function procesarTextoDeScript(textoScript) {
+            const posicionIgual = textoScript.indexOf('=');
+            if (posicionIgual === -1) {
+                throw new Error("El archivo de datos no tiene la cabecera válida de GX-Cloud.");
+            }
+            
+            let textoJson = textoScript.substring(posicionIgual + 1).trim();
+            
+            // Limpiamos punto y coma final
+            if (textoJson.endsWith(';')) {
+                textoJson = textoJson.slice(0, -1);
+            }
+            
+            const data = JSON.parse(textoJson);
+            procesarDatos(data);
+        }
+
+        // Procesa la información estructurada
         function procesarDatos(data) {
             try {
                 if (data && typeof data === 'object') {
                     const datos = data.productos ? data : window.data_catalogo;
                     
                     if (!datos || !datos.productos) {
-                        throw new Error("La propiedad 'productos' no se encuentra definida en la base de datos.");
+                        throw new Error("El archivo de datos no contiene una lista de productos válida.");
                     }
 
                     productos = datos.productos || [];
@@ -177,23 +157,23 @@
                     document.getElementById('contenedor-productos').classList.remove('hidden');
                     cargarProductos(productos);
                 } else {
-                    throw new Error("El formato del archivo JSON de productos es inválido.");
+                    throw new Error("Estructura de datos corrupta.");
                 }
             } catch (error) {
-                mostrarError("Estructura de datos en 'productos.js' incorrecta o corrupta.", error.message);
+                mostrarError("Error al procesar el inventario.", error.message);
             }
         }
 
-        // Muestra el aviso visual de error en pantalla con detalle de depuración
+        // Muestra el aviso visual de error en pantalla
         function mostrarError(mensajeDetallado, errorTecnico = "") {
             document.getElementById('loading').innerHTML = `
                 <div class="text-rose-500 py-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 max-w-md mx-auto text-center">
-                    <i class="fa-solid fa-circle-exclamation text-4xl mb-3"></i>
-                    <p class="font-bold text-lg text-slate-800">Error de Sincronización</p>
+                    <i class="fa-solid fa-circle-exclamation text-4xl mb-3 text-rose-500"></i>
+                    <p class="font-bold text-lg text-slate-800">Sincronización Pendiente</p>
                     <p class="text-sm text-slate-500 mt-2 leading-relaxed">${mensajeDetallado}</p>
                     ${errorTecnico ? `
                     <div class="mt-4 text-left">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Detalle de error para soporte:</span>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Detalle técnico:</span>
                         <div class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100 font-mono break-all leading-normal">
                             ${errorTecnico}
                         </div>
