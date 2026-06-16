@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Digital | GX-Cloud</title>
+    <!-- Tailwind CSS para diseño moderno y fluido -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Iconos Font-Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'DM Sans', sans-serif; background-color: #f1f5f9; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- ENCABEZADO CON COLORES GX-CLOUD (Morado Profundo) -->
+    <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md border-b-4 border-[#8b5cf6]">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 id="nombre-tienda" class="text-2xl font-bold tracking-tight text-white">MI TIENDA GX-CLOUD</h1>
+                    <p class="text-xs text-violet-200">Inventario Sincronizado en Tiempo Real</p>
+                </div>
+                <!-- Badge de Estado En Línea -->
+                <span class="bg-[#8b5cf6] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm animate-pulse">
+                    ● EN LÍNEA
+                </span>
+            </div>
+            
+            <!-- BUSCADOR CON DISEÑO PREMIUM -->
+            <div class="relative mt-1">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-violet-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="buscador" onkeyup="filtrarProductos()" placeholder="Buscar por código, detalle o marca..." 
+                    class="w-full bg-slate-100 text-slate-900 pl-10 pr-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-[#8b5cf6] focus:bg-white outline-none shadow-inner placeholder-slate-400 text-sm transition-all">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6">
+        <!-- ESTADO DE CARGA -->
+        <div id="loading" class="text-center py-12">
+            <i class="fa-solid fa-circle-notch animate-spin text-4xl text-[#2e1065] mb-3"></i>
+            <p class="text-slate-500 font-medium">Conectando con la base de datos de Google Drive...</p>
+        </div>
+
+        <!-- CONTENEDOR DE PRODUCTOS -->
+        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden">
+            <!-- Se carga de forma dinámica desde el script productos.js -->
+        </div>
+
+        <!-- MENSAJE DE NO ENCONTRADO -->
+        <div id="sin-resultados" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+            <i class="fa-solid fa-box-open text-slate-300 text-5xl mb-3"></i>
+            <p class="text-slate-600 font-medium">No encontramos productos que coincidan.</p>
+        </div>
+    </main>
+
+    <!-- FOOTER GRIS OSCURO -->
+    <footer class="bg-slate-950 text-slate-400 text-center py-8 text-xs mt-12 border-t border-slate-800">
+        <p class="mb-1">© 2026 Powered by <span class="text-[#8b5cf6] font-bold">GX-TOUCH</span> Systems</p>
+        <p class="text-[10px] text-slate-600">Conexión directa segura vía Google Drive API</p>
+    </footer>
+
+    <script>
+        let productos = [];
+
+        // Función para leer los parámetros de la URL (?driveId=TU_ID_DE_GOOGLE_DRIVE)
+        function obtenerParametroUrl(nombre) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(nombre);
+        }
+
+        async function cargarDatosDesdeDrive() {
+            // Buscamos el ID del archivo del cliente en la URL
+            const driveId = obtenerParametroUrl('driveId');
+            
+            // Si no hay parámetro en la URL, pasamos a modo simulación local para tus pruebas en la PC
+            if (!driveId) {
+                console.log("No se detectó ID de Drive en la URL. Cargando modo simulación local...");
+                cargarScriptLocal();
+                return;
+            }
+
+            // Si hay un ID de Drive, creamos dinámicamente la etiqueta de script apuntando al archivo en su nube
+            // Usamos el enlace de exportación directa que Google Drive permite para archivos públicos
+            const urlDrive = `https://docs.google.com/uc?export=download&id=${driveId}`;
+            
+            try {
+                const script = document.createElement('script');
+                script.src = urlDrive;
+                script.onload = () => {
+                    procesarDatos();
+                };
+                script.onerror = () => {
+                    mostrarError("No se pudo conectar con el archivo de Google Drive. Verifica que sea público y el ID esté correcto.");
+                };
+                document.body.appendChild(script);
+            } catch (error) {
+                mostrarError("Error en la petición de datos desde el servidor.");
+            }
+        }
+
+        // Carga el archivo local para cuando estés probando en tu Windows 11 sin subirlo a internet
+        function cargarScriptLocal() {
+            const script = document.createElement('script');
+            script.src = "productos.js";
+            script.onload = () => {
+                procesarDatos();
+            };
+            script.onerror = () => {
+                mostrarError("Falta el archivo 'productos.js' en la carpeta o el ID de Google Drive en la URL (?driveId=...).");
+            };
+            document.body.appendChild(script);
+        }
+
+        // Procesa la información una vez que el script externo (local o de Drive) se ha cargado en memoria
+        function procesarDatos() {
+            try {
+                if (typeof data_catalogo !== 'undefined') {
+                    productos = data_catalogo.productos || [];
+                    
+                    if (data_catalogo.tienda) {
+                        document.getElementById('nombre-tienda').textContent = data_catalogo.tienda.toUpperCase();
+                    }
+
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('contenedor-productos').classList.remove('hidden');
+                    cargarProductos(productos);
+                } else {
+                    throw new Error("Estructura de datos inválida.");
+                }
+            } catch (error) {
+                mostrarError("Estructura de datos en 'productos.js' incorrecta o variable global no definida.");
+            }
+        }
+
+        // Muestra un aviso elegante en pantalla si algo falla
+        function mostrarError(mensajeDetallado) {
+            document.getElementById('loading').innerHTML = `
+                <div class="text-rose-500 py-6 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 max-w-md mx-auto">
+                    <i class="fa-solid fa-circle-exclamation text-4xl mb-3"></i>
+                    <p class="font-bold text-lg text-slate-800">Error de Sincronización</p>
+                    <p class="text-sm text-slate-500 mt-1">${mensajeDetallado}</p>
+                </div>`;
+        }
+
+        // Renderiza las tarjetas de productos en una cuadrícula (grid)
+        function cargarProductos(lista) {
+            const contenedor = document.getElementById('contenedor-productos');
+            const sinResultados = document.getElementById('sin-resultados');
+            
+            contenedor.innerHTML = "";
+            if (lista.length === 0) {
+                sinResultados.classList.remove('hidden');
+                return;
+            }
+            sinResultados.classList.add('hidden');
+
+            lista.forEach(prod => {
+                const tieneStock = prod.stock > 0;
+                const badgeStock = tieneStock 
+                    ? `<span class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Disponible: ${prod.stock}</span>`
+                    : `<span class="text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">Agotado</span>`;
+
+                const tarjeta = `
+                    <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden flex flex-col justify-between group hover:shadow-md transition-all duration-200">
+                        <!-- Contenedor de la Imagen con Fallback automático si falla el enlace -->
+                        <div class="relative bg-slate-50 h-36 flex items-center justify-center overflow-hidden">
+                            <img src="${prod.foto}" alt="${prod.detalle}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
+                        </div>
+                        <div class="p-3.5 flex flex-col flex-grow justify-between gap-3">
+                            <div>
+                                <p class="text-[10px] uppercase font-bold tracking-wider text-slate-400">${prod.codigo}</p>
+                                <h3 class="text-sm font-medium text-slate-800 line-clamp-2 leading-tight">${prod.detalle}</h3>
+                            </div>
+                            <div class="pt-2 border-t border-slate-100 flex flex-col gap-1.5">
+                                <span class="text-base font-bold text-[#2e1065]">$${parseFloat(prod.precio).toFixed(2)}</span>
+                                ${badgeStock}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                contenedor.innerHTML += tarjeta;
+            });
+        }
+
+        // Buscador instantáneo local que no consume megas del servidor
+        function filtrarProductos() {
+            const texto = document.getElementById('buscador').value.toLowerCase();
+            const filtrados = productos.filter(p => 
+                p.detalle.toLowerCase().includes(texto) || 
+                p.codigo.toLowerCase().includes(texto)
+            );
+            cargarProductos(filtrados);
+        }
+
+        // Arrancar carga de datos
+        window.onload = cargarDatosDesdeDrive;
+    </script>
+</body>
+</html>
