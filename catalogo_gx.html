@@ -86,10 +86,13 @@
                     const script = document.createElement('script');
                     script.src = "productos.js";
                     script.onload = () => procesarDatos(window.data_catalogo);
-                    script.onerror = () => mostrarError("Falta el archivo 'productos.js' o el parámetro '?driveId=' en la URL.");
+                    script.onerror = () => mostrarError(
+                        "Falta el archivo 'productos.js' en esta carpeta o necesitas pasar el parámetro '?driveId=' en la URL para leer desde internet.",
+                        "Modo simulación local activo. Asegúrate de que productos.js exista al lado de este archivo."
+                    );
                     document.body.appendChild(script);
                 } catch (e) {
-                    mostrarError("Error en carga de simulación local.");
+                    mostrarError("Error crítico de inicialización local.", e.message);
                 }
                 return;
             }
@@ -99,14 +102,14 @@
             
             try {
                 const response = await fetch(urlDrive);
-                if (!response.ok) throw new Error("Google Drive rechazó la conexión.");
+                if (!response.ok) throw new Error(`Google Drive respondió con código de estado: ${response.status}`);
                 
                 const textoScript = await response.text();
                 
                 // Extraemos el objeto JSON del texto del script 'productos.js' de manera segura
                 // Buscamos lo que hay después del signo de asignación '='
                 const posicionIgual = textoScript.indexOf('=');
-                if (posicionIgual === -1) throw new Error("El formato del archivo productos.js no es válido.");
+                if (posicionIgual === -1) throw new Error("El archivo de Drive no tiene la estructura 'const data_catalogo = { ... }'.");
                 
                 let textoJson = textoScript.substring(posicionIgual + 1).trim();
                 
@@ -120,7 +123,10 @@
                 
             } catch (error) {
                 console.error(error);
-                mostrarError("No se pudo leer el archivo de Google Drive. Asegúrate de que el archivo esté compartido públicamente como 'Cualquier persona con el enlace'.");
+                mostrarError(
+                    "No se pudo leer el archivo de Google Drive. Asegúrate de que el archivo 'productos.js' esté compartido en Drive de manera pública como 'Cualquier persona con el enlace'.",
+                    error.message
+                );
             }
         }
 
@@ -131,6 +137,10 @@
                     // Si el script de simulación local usó el scope global de window
                     const datos = data.productos ? data : window.data_catalogo;
                     
+                    if (!datos || !datos.productos) {
+                        throw new Error("La propiedad 'productos' no está definida en la base de datos.");
+                    }
+
                     productos = datos.productos || [];
                     
                     if (datos.tienda) {
@@ -141,20 +151,27 @@
                     document.getElementById('contenedor-productos').classList.remove('hidden');
                     cargarProductos(productos);
                 } else {
-                    throw new Error("Datos corruptos.");
+                    throw new Error("La estructura del archivo de datos es ilegible o no es un objeto JSON válido.");
                 }
             } catch (error) {
-                mostrarError("Estructura de datos en 'productos.js' incorrecta.");
+                mostrarError("Estructura de datos en 'productos.js' incorrecta o corrupta.", error.message);
             }
         }
 
-        // Muestra el aviso visual de error en pantalla
-        function mostrarError(mensajeDetallado) {
+        // Muestra el aviso visual de error en pantalla con detalle de depuración
+        function mostrarError(mensajeDetallado, errorTecnico = "") {
             document.getElementById('loading').innerHTML = `
-                <div class="text-rose-500 py-6 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 max-w-md mx-auto">
+                <div class="text-rose-500 py-6 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 max-w-md mx-auto text-center">
                     <i class="fa-solid fa-circle-exclamation text-4xl mb-3"></i>
                     <p class="font-bold text-lg text-slate-800">Error de Sincronización</p>
-                    <p class="text-sm text-slate-500 mt-1">${mensajeDetallado}</p>
+                    <p class="text-sm text-slate-500 mt-2 leading-relaxed">${mensajeDetallado}</p>
+                    ${errorTecnico ? `
+                    <div class="mt-4 text-left">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Detalle de error para soporte:</span>
+                        <div class="text-[11px] text-slate-600 mt-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100 font-mono break-all leading-normal">
+                            ${errorTecnico}
+                        </div>
+                    </div>` : ''}
                 </div>`;
         }
 
