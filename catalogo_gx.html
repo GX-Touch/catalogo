@@ -97,35 +97,59 @@
                 return;
             }
 
-            // Si hay un ID de Drive, usamos el bypass para CORS y descarga de Google Drive sin restricciones
-            const urlDrive = `https://corsproxy.io/?https://drive.google.com/uc?export=download&id=${driveId}`;
+            // Enlace original limpio de Google Drive
+            const urlOriginalDrive = `https://drive.google.com/uc?export=download&id=${driveId}`;
             
-            try {
-                const response = await fetch(urlDrive);
-                if (!response.ok) throw new Error(`Google Drive respondió con código de estado: ${response.status}`);
-                
-                const textoScript = await response.text();
-                
-                // Extraemos el objeto JSON del texto del script 'productos.js' de manera segura
-                // Buscamos lo que hay después del signo de asignación '='
-                const posicionIgual = textoScript.indexOf('=');
-                if (posicionIgual === -1) throw new Error("El archivo de Drive no tiene la estructura 'const data_catalogo = { ... }'.");
-                
-                let textoJson = textoScript.substring(posicionIgual + 1).trim();
-                
-                // Si el script termina en punto y coma, lo removemos para que sea JSON puro
-                if (textoJson.endsWith(';')) {
-                    textoJson = textoJson.slice(0, -1);
+            // Rotación inteligente de Proxies para evadir bloqueos de CORS y 403
+            const proxies = [
+                `https://corsproxy.io/?${encodeURIComponent(urlOriginalDrive)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(urlOriginalDrive)}`,
+                `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(urlOriginalDrive)}`
+            ];
+
+            let exito = false;
+            let ultimoError = "";
+
+            // Bucle de reintentos con diferentes servidores proxies
+            for (let i = 0; i < proxies.length; i++) {
+                try {
+                    console.log(`Intentando conectar mediante Proxy Servidor ${i + 1}...`);
+                    const response = await fetch(proxies[i]);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Servidor Proxy ${i + 1} respondió con código: ${response.status}`);
+                    }
+                    
+                    const textoScript = await response.text();
+                    
+                    // Extraemos el objeto JSON de la estructura 'const data_catalogo = { ... }'
+                    const posicionIgual = textoScript.indexOf('=');
+                    if (posicionIgual === -1) {
+                        throw new Error("El archivo descargado no tiene la asignación 'data_catalogo = ' al principio.");
+                    }
+                    
+                    let textoJson = textoScript.substring(posicionIgual + 1).trim();
+                    
+                    // Limpiamos punto y coma final si existe
+                    if (textoJson.endsWith(';')) {
+                        textoJson = textoJson.slice(0, -1);
+                    }
+                    
+                    const data = JSON.parse(textoJson);
+                    procesarDatos(data);
+                    exito = true;
+                    break; // Salimos del bucle si logramos cargar con éxito
+                    
+                } catch (error) {
+                    console.warn(`Fallo en el intento con Proxy ${i + 1}:`, error.message);
+                    ultimoError = error.message;
                 }
-                
-                const data = JSON.parse(textoJson);
-                procesarDatos(data);
-                
-            } catch (error) {
-                console.error(error);
+            }
+
+            if (!exito) {
                 mostrarError(
-                    "No se pudo leer el archivo de Google Drive. Asegúrate de que el archivo 'productos.js' esté compartido en Drive de manera pública como 'Cualquier persona con el enlace'.",
-                    error.message
+                    "No se pudo sincronizar el inventario. Asegúrate de que el archivo 'productos.js' en Google Drive esté compartido como 'Cualquier persona con el enlace' (Público).",
+                    `Detalles de todos los intentos fallidos: ${ultimoError}`
                 );
             }
         }
@@ -134,11 +158,10 @@
         function procesarDatos(data) {
             try {
                 if (data && typeof data === 'object') {
-                    // Si el script de simulación local usó el scope global de window
                     const datos = data.productos ? data : window.data_catalogo;
                     
                     if (!datos || !datos.productos) {
-                        throw new Error("La propiedad 'productos' no está definida en la base de datos.");
+                        throw new Error("La propiedad 'productos' no se encuentra definida en la base de datos.");
                     }
 
                     productos = datos.productos || [];
@@ -151,7 +174,7 @@
                     document.getElementById('contenedor-productos').classList.remove('hidden');
                     cargarProductos(productos);
                 } else {
-                    throw new Error("La estructura del archivo de datos es ilegible o no es un objeto JSON válido.");
+                    throw new Error("El formato del archivo JSON de productos es inválido.");
                 }
             } catch (error) {
                 mostrarError("Estructura de datos en 'productos.js' incorrecta o corrupta.", error.message);
@@ -215,10 +238,10 @@
         }
 
         function filtrarProductos() {
-            const texto = document.getElementById('buscador').value.toLowerCase();
+            const text = document.getElementById('buscador').value.toLowerCase();
             const filtrados = productos.filter(p => 
-                p.detalle.toLowerCase().includes(texto) || 
-                p.codigo.toLowerCase().includes(texto)
+                p.detalle.toLowerCase().includes(text) || 
+                p.codigo.toLowerCase().includes(text)
             );
             cargarProductos(filtrados);
         }
