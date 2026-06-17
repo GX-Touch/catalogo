@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo Digital | GX-Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -19,17 +17,20 @@
         <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col gap-3">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 id="nombre-tienda" class="text-2xl font-bold tracking-tight text-white">CARGANDO...</h1>
+                    <h1 id="nombre-tienda" class="text-xl font-bold tracking-tight text-white">CARGANDO...</h1>
                     <p id="contacto-tienda" class="text-xs text-violet-200">Sincronizando datos...</p>
                 </div>
-                <span class="bg-[#8b5cf6] text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm animate-pulse">● EN LÍNEA</span>
+                <!-- Indicador Verde Original -->
+                <span class="bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm shadow-green-500/50 animate-pulse">
+                    ● EN LÍNEA
+                </span>
             </div>
             
             <div class="relative mt-1">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-violet-400">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </span>
-                <input type="text" id="buscador" onkeyup="filtrarProductos()" placeholder="Buscar por código, detalle o marca..." 
+                <input type="text" id="buscador" onkeyup="filtrarProductos()" placeholder="Buscar producto..." 
                     class="w-full bg-slate-100 text-slate-900 pl-10 pr-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-[#8b5cf6] focus:bg-white outline-none shadow-inner placeholder-slate-400 text-sm transition-all">
             </div>
         </div>
@@ -38,70 +39,43 @@
     <main class="max-w-4xl mx-auto px-4 py-6">
         <div id="loading" class="text-center py-12">
             <i class="fa-solid fa-circle-notch animate-spin text-4xl text-[#2e1065] mb-3"></i>
-            <p class="text-slate-500 font-medium">Cargando inventario...</p>
+            <p class="text-slate-500 font-medium">Cargando catálogo...</p>
         </div>
 
         <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden"></div>
-
-        <div id="sin-resultados" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-            <i class="fa-solid fa-box-open text-slate-300 text-5xl mb-3"></i>
-            <p class="text-slate-600 font-medium">No encontramos productos que coincidan.</p>
-        </div>
     </main>
 
-    <!-- BOTÓN FLOTANTE DE CONTACTO GENERAL -->
     <a id="btn-whatsapp-general" href="#" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 transition-all z-50">
         <i class="fa-brands fa-whatsapp text-2xl"></i>
     </a>
 
-    <footer class="bg-slate-950 text-slate-400 text-center py-8 text-xs mt-12 border-t border-slate-800">
-        <p class="mb-1">© 2026 Powered by <span class="text-[#8b5cf6] font-bold">GX-TOUCH</span> Systems</p>
-    </footer>
-
     <script>
         let productos = [];
-        let numWhatsApp = "584120000000"; // Este número se actualizará con el JSON
-
-        function obtenerParametroUrl(nombre) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(nombre);
-        }
+        let numWhatsApp = "";
 
         async function cargarDatos() {
-            const serialCliente = obtenerParametroUrl('serial');
-            if (!serialCliente) {
-                mostrarError("Error de Acceso", "No se ha especificado un serial.");
-                return;
-            }
+            const urlParams = new URLSearchParams(window.location.search);
+            const serialCliente = urlParams.get('serial');
+            if (!serialCliente) return;
 
-            const urlDatosRemotos = `data/${serialCliente.toLowerCase()}.js?t=${new Date().getTime()}`;
+            // Al leer el archivo .js, procesamos el JSON directamente
+            const urlDatos = `data/${serialCliente.toLowerCase()}.js?t=${new Date().getTime()}`;
             try {
-                const response = await fetch(urlDatosRemotos);
-                const textoScript = await response.text();
-                procesarTextoDeScript(textoScript);
+                const response = await fetch(urlDatos);
+                const data = await response.json(); 
+                procesarDatos(data);
             } catch (error) {
-                mostrarError("Error de sincronización", error.message);
+                console.error("Error:", error);
             }
-        }
-
-        function procesarTextoDeScript(textoScript) {
-            const posicionIgual = textoScript.indexOf('=');
-            let textoJson = textoScript.substring(posicionIgual + 1).trim();
-            if (textoJson.endsWith(';')) textoJson = textoJson.slice(0, -1);
-            
-            const data = JSON.parse(textoJson);
-            procesarDatos(data);
         }
 
         function procesarDatos(data) {
             productos = data.productos || [];
-            numWhatsApp = data.telefono_ws || numWhatsApp; // Carga el num del JSON
+            numWhatsApp = data.telefono_ws || "";
             
             document.getElementById('nombre-tienda').textContent = data.tienda || "TIENDA";
             document.getElementById('contacto-tienda').textContent = "WhatsApp: " + numWhatsApp;
-            
-            // Configurar botón flotante general
-            document.getElementById('btn-whatsapp-general').href = `https://wa.me/${numWhatsApp}?text=Hola, quiero consultar sobre productos del catálogo.`;
+            document.getElementById('btn-whatsapp-general').href = `https://wa.me/${numWhatsApp}?text=Hola, quiero consultar sobre productos.`;
             
             document.getElementById('loading').classList.add('hidden');
             document.getElementById('contenedor-productos').classList.remove('hidden');
@@ -112,28 +86,20 @@
             const contenedor = document.getElementById('contenedor-productos');
             contenedor.innerHTML = "";
             lista.forEach(prod => {
-                const mensajeWS = `Hola, me interesa el producto: *${prod.detalle}* (Cód: ${prod.codigo}). ¿Aún tienen disponible?`;
-                const linkWS = `https://wa.me/${numWhatsApp}?text=${encodeURIComponent(mensajeWS)}`;
-
+                const estado = prod.stock > 0 ? `<span class="text-emerald-600">Disponible</span>` : `<span class="text-red-500">Agotado</span>`;
                 contenedor.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden flex flex-col">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                         <img src="${prod.foto}" class="h-32 w-full object-cover" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
-                        <div class="p-3 flex-grow flex flex-col justify-between">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400">${prod.codigo}</p>
-                                <h3 class="text-sm font-medium line-clamp-2">${prod.detalle}</h3>
-                                <p class="text-lg font-bold text-[#2e1065] mt-1">$${parseFloat(prod.precio).toFixed(2)}</p>
+                        <div class="p-3">
+                            <p class="text-[9px] font-bold text-slate-400">${prod.codigo}</p>
+                            <h3 class="text-sm font-medium line-clamp-2 h-10">${prod.detalle}</h3>
+                            <div class="flex justify-between items-center mt-2">
+                                <p class="text-sm font-bold text-[#2e1065]">$${parseFloat(prod.precio).toFixed(2)}</p>
+                                <p class="text-[10px] font-bold">${estado}</p>
                             </div>
-                            <a href="${linkWS}" target="_blank" class="mt-3 w-full bg-emerald-50 text-emerald-700 text-xs font-bold py-2 rounded-lg text-center hover:bg-emerald-100 transition-colors">
-                                <i class="fa-brands fa-whatsapp mr-1"></i> Consultar
-                            </a>
                         </div>
                     </div>`;
             });
-        }
-
-        function mostrarError(titulo, detalle) {
-            document.getElementById('loading').innerHTML = `<div class="p-6 text-rose-500 font-bold">${titulo}<br><span class="text-sm">${detalle}</span></div>`;
         }
 
         function filtrarProductos() {
@@ -146,16 +112,3 @@
     </script>
 </body>
 </html>
-```
-
-### ¿Cómo aprovechar esto en tu sistema?
-Ahora, cuando tu VB6 genere el archivo `js` para cada cliente, asegúrate de incluir el campo `"telefono_ws"` para que todo se automatice:
-
-```javascript
-const data_catalogo = {
-  "tienda": "REPUESTOS EL RAYO",
-  "telefono_ws": "584121234567",  // <--- Solo números, sin espacios ni símbolos
-  "productos": [
-     ...
-  ]
-};
