@@ -10,19 +10,22 @@
     <style> body { font-family: 'DM Sans', sans-serif; background-color: #f1f5f9; } </style>
 </head>
 <body class="text-slate-800 pb-20">
+    
     <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-4">
             <h1 id="nombre-tienda" class="text-xl font-bold">CARGANDO...</h1>
             <p id="contacto-tienda" class="text-xs text-violet-200 mt-1"></p>
             <div class="flex gap-2 mt-3">
                 <input type="text" id="buscador" onkeyup="filtrar()" placeholder="Buscar producto..." class="w-full p-2 rounded-lg text-slate-900 text-sm">
-                <select id="filtro-cat" onchange="filtrar()" class="p-2 rounded-lg text-slate-900 text-sm"><option value="">Categorías</option></select>
+                <select id="filtro-cat" onchange="filtrar()" class="p-2 rounded-lg text-slate-900 text-sm">
+                    <option value="">Todas las Categorías</option>
+                </select>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-6">
-        <div id="loading" class="text-center py-10">Cargando catálogo...</div>
+        <div id="loading" class="text-center py-10 font-bold text-slate-600">Cargando catálogo...</div>
         <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
     </main>
 
@@ -34,22 +37,41 @@
         let datosGlobales = { productos: [] };
 
         async function cargarDatos() {
-            const serial = new URLSearchParams(window.location.search).get('serial');
-            if(!serial) return;
+            const params = new URLSearchParams(window.location.search);
+            const serial = params.get('serial');
+            
+            if(!serial) {
+                document.getElementById('loading').textContent = "Error: Falta el parámetro 'serial' en la URL.";
+                return;
+            }
+
             try {
                 const response = await fetch(`data/${serial.toLowerCase()}.js?t=${new Date().getTime()}`);
+                if (!response.ok) throw new Error("No se pudo conectar con el servidor.");
+                
                 const data = await response.json();
+                
                 document.getElementById('nombre-tienda').textContent = data.tienda;
                 document.getElementById('contacto-tienda').textContent = "WhatsApp: " + data.telefono_ws;
                 document.getElementById('btn-whatsapp-general').href = `https://wa.me/${data.telefono_ws}?text=Hola, quiero consultar productos.`;
                 document.getElementById('loading').style.display = 'none';
                 
                 datosGlobales.productos = data.productos;
-                const cats = [...new Set(data.productos.map(p => p.categoria))];
+                
+                // Cargar categorías
                 const select = document.getElementById('filtro-cat');
-                cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+                const cats = [...new Set(data.productos.map(p => p.categoria || "General"))];
+                cats.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    select.appendChild(opt);
+                });
+                
                 render(data.productos);
-            } catch (e) { document.getElementById('loading').textContent = "Error al cargar datos."; }
+            } catch (e) { 
+                document.getElementById('loading').textContent = "Error al cargar datos: " + e.message;
+            }
         }
 
         function render(lista) {
@@ -71,11 +93,17 @@
                     </div>`;
             });
         }
+
         function filtrar() {
             const t = document.getElementById('buscador').value.toLowerCase();
             const c = document.getElementById('filtro-cat').value;
-            render(datosGlobales.productos.filter(p => (p.detalle.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t)) && (c === "" || p.categoria === c)));
+            const filtrados = datosGlobales.productos.filter(p => 
+                (p.detalle.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t)) && 
+                (c === "" || p.categoria === c)
+            );
+            render(filtrados);
         }
+
         window.onload = cargarDatos;
     </script>
 </body>
