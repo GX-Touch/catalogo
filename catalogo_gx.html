@@ -33,7 +33,7 @@
 
     <main class="max-w-4xl mx-auto px-4 py-6">
         <div id="loading" class="text-center py-10 font-bold text-slate-600">Cargando catálogo...</div>
-        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </main>
 
     <a id="btn-whatsapp-general" href="#" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 z-50">
@@ -60,7 +60,6 @@
                 document.getElementById('rif-tienda').textContent = data.rif;
                 document.getElementById('contacto-tienda').textContent = "WhatsApp: " + data.telefono_ws;
                 
-                // ASIGNACIÓN DE LOGO CON SEGURIDAD
                 const imgLogo = document.getElementById('logo-empresa');
                 if (data.logo && data.logo.length > 5) {
                     imgLogo.src = data.logo;
@@ -68,7 +67,7 @@
                     imgLogo.style.display = 'none';
                 }
                 
-                document.getElementById('btn-whatsapp-general').href = `https://wa.me/${data.telefono_ws}?text=Hola, quiero consultar productos.`;
+                document.getElementById('btn-whatsapp-general').href = `https://wa.me/${data.telefono_ws}?text=¡Hola! 👋 Vi el catálogo de *${data.tienda}* y me gustaría recibir más información.`;
                 document.getElementById('loading').style.display = 'none';
                 
                 datosGlobales.productos = data.productos;
@@ -102,12 +101,12 @@
                 
                 cont.innerHTML += `
                     <div class="bg-white p-3 rounded-2xl border shadow-sm">
-                        <img src="${p.foto}" class="h-32 w-full object-cover rounded-lg" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
+                        <img src="${p.foto}" class="h-40 sm:h-48 w-full object-cover object-center rounded-lg" onerror="this.src='https://placehold.co/128x128?text=Sin+Foto'">
                         <p class="text-[10px] font-bold text-slate-400 mt-2">${p.codigo}</p>
                         <h3 class="text-sm font-medium h-10 line-clamp-2">${p.detalle}</h3>
                         <p class="text-lg font-bold text-[#2e1065] my-1">${precio}</p>
                         <p class="text-xs font-bold ${claseEstado}">${textoEstado}</p>
-                        <a href="https://wa.me/${p.tel}?text=Consulta sobre ${p.detalle}" class="block mt-3 w-full ${esInactivo ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-800'} text-white text-center py-2 rounded-lg text-[10px] font-bold">
+                        <a href="https://wa.me/${p.tel}?text=¡Hola! 👋 Me interesa el producto: *${p.detalle}* (Ref: ${p.codigo}). ¿Podrías darme más detalles?" class="block mt-3 w-full ${esInactivo ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-800'} text-white text-center py-2 rounded-lg text-[10px] font-bold">
                             <i class="fa-brands fa-whatsapp"></i> CONSULTAR
                         </a>
                     </div>`;
