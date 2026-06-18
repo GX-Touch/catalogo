@@ -18,7 +18,7 @@
             <p id="contacto-tienda" class="text-xs text-violet-200 mt-1"></p>
             
             <div class="absolute top-4 right-4">
-                <img id="logo-empresa" src="" class="h-12 w-12 object-contain bg-white rounded-full border-2 border-violet-300 shadow-lg" onerror="this.style.display='none'">
+                <img id="logo-empresa" src="" class="h-12 w-12 object-contain bg-white rounded-full border-2 border-violet-300 shadow-lg">
             </div>
             
             <div class="flex gap-2 mt-3 relative">
@@ -56,13 +56,17 @@
                 const texto = await response.text();
                 const data = JSON.parse(texto.trim().replace(/^\uFEFF/, ''));
                 
-                // Asignación de datos
                 document.getElementById('nombre-tienda').textContent = data.tienda;
                 document.getElementById('rif-tienda').textContent = data.rif;
                 document.getElementById('contacto-tienda').textContent = "WhatsApp: " + data.telefono_ws;
                 
-                // Asignación de la URL del logo que viene en el JSON
-                document.getElementById('logo-empresa').src = data.logo;
+                // ASIGNACIÓN DE LOGO CON SEGURIDAD
+                const imgLogo = document.getElementById('logo-empresa');
+                if (data.logo && data.logo.length > 5) {
+                    imgLogo.src = data.logo;
+                } else {
+                    imgLogo.style.display = 'none';
+                }
                 
                 document.getElementById('btn-whatsapp-general').href = `https://wa.me/${data.telefono_ws}?text=Hola, quiero consultar productos.`;
                 document.getElementById('loading').style.display = 'none';
