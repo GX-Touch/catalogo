@@ -10,69 +10,71 @@
     <style> body { font-family: 'DM Sans', sans-serif; background-color: #f1f5f9; } </style>
 </head>
 <body class="text-slate-800 pb-20">
-
     <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-4">
             <h1 id="nombre-tienda" class="text-xl font-bold">CARGANDO...</h1>
+            <p id="contacto-tienda" class="text-xs text-violet-200 mt-1"></p>
             <div class="flex gap-2 mt-3">
-                <input type="text" id="buscador" onkeyup="filtrar()" placeholder="Buscar..." class="w-full p-2 rounded-lg text-slate-900 text-sm">
+                <input type="text" id="buscador" onkeyup="filtrar()" placeholder="Buscar producto..." class="w-full p-2 rounded-lg text-slate-900 text-sm">
                 <select id="filtro-cat" onchange="filtrar()" class="p-2 rounded-lg text-slate-900 text-sm"><option value="">Categorías</option></select>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-6">
+        <div id="loading" class="text-center py-10">Cargando catálogo...</div>
         <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
     </main>
 
+    <a id="btn-whatsapp-general" href="#" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 z-50">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+    </a>
+
     <script>
-        let datosGlobales = { productos: [], categorias: [] };
+        let datosGlobales = { productos: [] };
 
         async function cargarDatos() {
             const serial = new URLSearchParams(window.location.search).get('serial');
-            const response = await fetch(`data/${serial.toLowerCase()}.js?t=${new Date().getTime()}`);
-            const data = await response.json();
-            
-            document.getElementById('nombre-tienda').textContent = data.tienda;
-            datosGlobales.productos = data.productos;
-            
-            // Extraer categorías únicas
-            const cats = [...new Set(data.productos.map(p => p.categoria))];
-            const select = document.getElementById('filtro-cat');
-            cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
-            
-            render(data.productos);
+            if(!serial) return;
+            try {
+                const response = await fetch(`data/${serial.toLowerCase()}.js?t=${new Date().getTime()}`);
+                const data = await response.json();
+                document.getElementById('nombre-tienda').textContent = data.tienda;
+                document.getElementById('contacto-tienda').textContent = "WhatsApp: " + data.telefono_ws;
+                document.getElementById('btn-whatsapp-general').href = `https://wa.me/${data.telefono_ws}?text=Hola, quiero consultar productos.`;
+                document.getElementById('loading').style.display = 'none';
+                
+                datosGlobales.productos = data.productos;
+                const cats = [...new Set(data.productos.map(p => p.categoria))];
+                const select = document.getElementById('filtro-cat');
+                cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+                render(data.productos);
+            } catch (e) { document.getElementById('loading').textContent = "Error al cargar datos."; }
         }
 
         function render(lista) {
             const cont = document.getElementById('contenedor-productos');
             cont.innerHTML = "";
             lista.forEach(p => {
-                const esAgotado = p.stock <= 0;
-                const precio = (p.origen === 'ESTANDAR') ? 'Bs. ' + p.precioBs : '$ ' + p.precio;
-                
+                const esAgotado = parseFloat(p.stock) <= 0;
+                const precio = (p.origen === 'ESTANDAR') ? 'Bs. ' + parseFloat(p.precioBs).toFixed(2) : '$ ' + parseFloat(p.precio).toFixed(2);
                 cont.innerHTML += `
                     <div class="bg-white p-3 rounded-2xl border shadow-sm">
                         <img src="${p.foto}" class="h-32 w-full object-cover rounded-lg" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
-                        <p class="text-[11px] font-bold text-slate-400 mt-2">${p.codigo}</p>
+                        <p class="text-[10px] font-bold text-slate-400 mt-2">${p.codigo}</p>
                         <h3 class="text-sm font-medium h-10 line-clamp-2">${p.detalle}</h3>
                         <p class="text-lg font-bold text-[#2e1065] my-1">${precio}</p>
-                        <p class="text-sm font-bold ${esAgotado ? 'text-red-500' : 'text-green-600'}">${esAgotado ? 'Agotado' : 'Disponible'}</p>
-                        <a href="https://wa.me/${p.tel}?text=Consulta sobre ${p.detalle}" class="block mt-3 w-full bg-emerald-500 text-white text-center py-2 rounded-lg text-xs font-bold">
-                            <i class="fa-brands fa-whatsapp"></i> Consultar
+                        <p class="text-xs font-bold ${esAgotado ? 'text-red-500' : 'text-green-600'}">${esAgotado ? 'Agotado' : 'Disponible'}</p>
+                        <a href="https://wa.me/${p.tel}?text=Consulta sobre ${p.detalle}" class="block mt-3 w-full bg-slate-800 text-white text-center py-2 rounded-lg text-[10px] font-bold">
+                            <i class="fa-brands fa-whatsapp"></i> CONSULTAR
                         </a>
                     </div>`;
             });
         }
-
         function filtrar() {
-            const texto = document.getElementById('buscador').value.toLowerCase();
-            const cat = document.getElementById('filtro-cat').value;
-            const filtrados = datosGlobales.productos.filter(p => 
-                (p.detalle.toLowerCase().includes(texto) || p.codigo.toLowerCase().includes(texto)) &&
-                (cat === "" || p.categoria === cat)
-            );
-            render(filtrados);
+            const t = document.getElementById('buscador').value.toLowerCase();
+            const c = document.getElementById('filtro-cat').value;
+            render(datosGlobales.productos.filter(p => (p.detalle.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t)) && (c === "" || p.categoria === c)));
         }
         window.onload = cargarDatos;
     </script>
