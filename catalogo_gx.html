@@ -46,10 +46,15 @@
             }
 
             try {
+                // 1. Obtenemos el archivo como texto plano primero
                 const response = await fetch(`data/${serial.toLowerCase()}.js?t=${new Date().getTime()}`);
-                if (!response.ok) throw new Error("No se pudo conectar con el servidor.");
+                const texto = await response.text();
                 
-                const data = await response.json();
+                // 2. Limpiamos caracteres invisibles (BOM) que a veces corrompen el JSON
+                const jsonLimpio = texto.trim().replace(/^\uFEFF/, '');
+                
+                // 3. Parseamos manualmente para capturar errores de sintaxis exactos
+                const data = JSON.parse(jsonLimpio);
                 
                 document.getElementById('nombre-tienda').textContent = data.tienda;
                 document.getElementById('contacto-tienda').textContent = "WhatsApp: " + data.telefono_ws;
@@ -70,7 +75,9 @@
                 
                 render(data.productos);
             } catch (e) { 
-                document.getElementById('loading').textContent = "Error al cargar datos: " + e.message;
+                document.getElementById('loading').innerHTML = "Error de formato JSON: " + e.message + 
+                    "<br><small>Revisa que los nombres de productos no tengan comillas dobles ni saltos de línea.</small>";
+                console.error("Error detallado:", e);
             }
         }
 
@@ -97,11 +104,10 @@
         function filtrar() {
             const t = document.getElementById('buscador').value.toLowerCase();
             const c = document.getElementById('filtro-cat').value;
-            const filtrados = datosGlobales.productos.filter(p => 
+            render(datosGlobales.productos.filter(p => 
                 (p.detalle.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t)) && 
                 (c === "" || p.categoria === c)
-            );
-            render(filtrados);
+            ));
         }
 
         window.onload = cargarDatos;
