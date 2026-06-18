@@ -1,4 +1,54 @@
-<script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Digital | GX-Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'DM Sans', sans-serif; background-color: #f1f5f9; }
+    </style>
+</head>
+<body class="text-slate-800 pb-20">
+
+    <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md border-b-4 border-[#8b5cf6]">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 id="nombre-tienda" class="text-xl font-bold tracking-tight text-white">CARGANDO...</h1>
+                    <p id="contacto-tienda" class="text-xs text-violet-200">Sincronizando datos...</p>
+                </div>
+                <span class="bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm shadow-green-500/50 animate-pulse">
+                    ● EN LÍNEA
+                </span>
+            </div>
+            
+            <div class="relative mt-1">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-violet-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="buscador" onkeyup="filtrarProductos()" placeholder="Buscar producto..." 
+                    class="w-full bg-slate-100 text-slate-900 pl-10 pr-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-[#8b5cf6] focus:bg-white outline-none shadow-inner placeholder-slate-400 text-sm transition-all">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-6">
+        <div id="loading" class="text-center py-12">
+            <i class="fa-solid fa-circle-notch animate-spin text-4xl text-[#2e1065] mb-3"></i>
+            <p class="text-slate-500 font-medium">Cargando catálogo...</p>
+        </div>
+
+        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden"></div>
+    </main>
+
+    <a id="btn-whatsapp-general" href="#" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 transition-all z-50">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+    </a>
+
+    <script>
         let productos = [];
         let numWhatsApp = "";
 
@@ -69,3 +119,5 @@
 
         window.onload = cargarDatos;
     </script>
+</body>
+</html>
