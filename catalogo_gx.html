@@ -7,116 +7,73 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body { font-family: 'DM Sans', sans-serif; background-color: #f1f5f9; }
-    </style>
+    <style> body { font-family: 'DM Sans', sans-serif; background-color: #f1f5f9; } </style>
 </head>
 <body class="text-slate-800 pb-20">
 
-    <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md border-b-4 border-[#8b5cf6]">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col gap-3">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h1 id="nombre-tienda" class="text-xl font-bold tracking-tight text-white">CARGANDO...</h1>
-                    <p id="contacto-tienda" class="text-xs text-violet-200">Sincronizando datos...</p>
-                </div>
-                <span class="bg-green-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm shadow-green-500/50 animate-pulse">
-                    ● EN LÍNEA
-                </span>
-            </div>
-            
-            <div class="relative mt-1">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-violet-400">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
-                <input type="text" id="buscador" onkeyup="filtrarProductos()" placeholder="Buscar producto..." 
-                    class="w-full bg-slate-100 text-slate-900 pl-10 pr-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-[#8b5cf6] focus:bg-white outline-none shadow-inner placeholder-slate-400 text-sm transition-all">
+    <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <h1 id="nombre-tienda" class="text-xl font-bold">CARGANDO...</h1>
+            <div class="flex gap-2 mt-3">
+                <input type="text" id="buscador" onkeyup="filtrar()" placeholder="Buscar..." class="w-full p-2 rounded-lg text-slate-900 text-sm">
+                <select id="filtro-cat" onchange="filtrar()" class="p-2 rounded-lg text-slate-900 text-sm"><option value="">Categorías</option></select>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-6">
-        <div id="loading" class="text-center py-12">
-            <i class="fa-solid fa-circle-notch animate-spin text-4xl text-[#2e1065] mb-3"></i>
-            <p class="text-slate-500 font-medium">Cargando catálogo...</p>
-        </div>
-
-        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4 hidden"></div>
+        <div id="contenedor-productos" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
     </main>
 
-    <a id="btn-whatsapp-general" href="#" target="_blank" class="fixed bottom-6 right-6 bg-emerald-500 text-white p-4 rounded-full shadow-lg hover:bg-emerald-600 transition-all z-50">
-        <i class="fa-brands fa-whatsapp text-2xl"></i>
-    </a>
-
     <script>
-        let productos = [];
-        let numWhatsApp = "";
+        let datosGlobales = { productos: [], categorias: [] };
 
         async function cargarDatos() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const serialCliente = urlParams.get('serial');
-            if (!serialCliente) {
-                document.getElementById('loading').innerHTML = '<p class="text-red-500">Error: No se especificó el catálogo.</p>';
-                return;
-            }
-
-            const urlDatos = `data/${serialCliente.toLowerCase()}.js?t=${new Date().getTime()}`;
-            try {
-                const response = await fetch(urlDatos);
-                if (!response.ok) throw new Error("Catálogo no encontrado");
-                const data = await response.json(); 
-                procesarDatos(data);
-            } catch (error) {
-                document.getElementById('loading').innerHTML = `<p class="text-red-500">Error cargando catálogo: ${error.message}</p>`;
-            }
+            const serial = new URLSearchParams(window.location.search).get('serial');
+            const response = await fetch(`data/${serial.toLowerCase()}.js?t=${new Date().getTime()}`);
+            const data = await response.json();
+            
+            document.getElementById('nombre-tienda').textContent = data.tienda;
+            datosGlobales.productos = data.productos;
+            
+            // Extraer categorías únicas
+            const cats = [...new Set(data.productos.map(p => p.categoria))];
+            const select = document.getElementById('filtro-cat');
+            cats.forEach(c => select.innerHTML += `<option value="${c}">${c}</option>`);
+            
+            render(data.productos);
         }
 
-        function procesarDatos(data) {
-            productos = data.productos || [];
-            numWhatsApp = data.telefono_ws || "";
-            
-            document.getElementById('nombre-tienda').textContent = data.tienda || "TIENDA SIN NOMBRE";
-            document.getElementById('contacto-tienda').textContent = numWhatsApp ? "WhatsApp: " + numWhatsApp : "";
-            
-            if(numWhatsApp) {
-                document.getElementById('btn-whatsapp-general').href = `https://wa.me/${numWhatsApp}?text=Hola, quiero consultar sobre productos.`;
-            } else {
-                document.getElementById('btn-whatsapp-general').classList.add('hidden');
-            }
-            
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('contenedor-productos').classList.remove('hidden');
-            cargarProductos(productos);
-        }
-
-        function cargarProductos(lista) {
-            const contenedor = document.getElementById('contenedor-productos');
-            contenedor.innerHTML = "";
-            lista.forEach(prod => {
-                const precio = parseFloat(prod.precio) || 0;
-                const estado = prod.stock > 0 ? `<span class="text-emerald-600 font-bold">Disponible</span>` : `<span class="text-red-500 font-bold">Agotado</span>`;
+        function render(lista) {
+            const cont = document.getElementById('contenedor-productos');
+            cont.innerHTML = "";
+            lista.forEach(p => {
+                const esAgotado = p.stock <= 0;
+                const precio = (p.origen === 'ESTANDAR') ? 'Bs. ' + p.precioBs : '$ ' + p.precio;
                 
-                contenedor.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
-                        <img src="${prod.foto}" class="h-32 w-full object-cover" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
-                        <div class="p-3">
-                            <p class="text-[9px] font-bold text-slate-400 uppercase">${prod.codigo}</p>
-                            <h3 class="text-sm font-medium line-clamp-2 h-10">${prod.detalle}</h3>
-                            <div class="flex justify-between items-center mt-2">
-                                <p class="text-sm font-bold text-[#2e1065]">$${precio.toFixed(2)}</p>
-                                <p class="text-[9px]">${estado}</p>
-                            </div>
-                        </div>
+                cont.innerHTML += `
+                    <div class="bg-white p-3 rounded-2xl border shadow-sm">
+                        <img src="${p.foto}" class="h-32 w-full object-cover rounded-lg" onerror="this.src='https://placehold.co/300x300?text=Sin+Foto'">
+                        <p class="text-[11px] font-bold text-slate-400 mt-2">${p.codigo}</p>
+                        <h3 class="text-sm font-medium h-10 line-clamp-2">${p.detalle}</h3>
+                        <p class="text-lg font-bold text-[#2e1065] my-1">${precio}</p>
+                        <p class="text-sm font-bold ${esAgotado ? 'text-red-500' : 'text-green-600'}">${esAgotado ? 'Agotado' : 'Disponible'}</p>
+                        <a href="https://wa.me/${p.tel}?text=Consulta sobre ${p.detalle}" class="block mt-3 w-full bg-emerald-500 text-white text-center py-2 rounded-lg text-xs font-bold">
+                            <i class="fa-brands fa-whatsapp"></i> Consultar
+                        </a>
                     </div>`;
             });
         }
 
-        function filtrarProductos() {
+        function filtrar() {
             const texto = document.getElementById('buscador').value.toLowerCase();
-            const filtrados = productos.filter(p => p.detalle.toLowerCase().includes(texto) || p.codigo.toLowerCase().includes(texto));
-            cargarProductos(filtrados);
+            const cat = document.getElementById('filtro-cat').value;
+            const filtrados = datosGlobales.productos.filter(p => 
+                (p.detalle.toLowerCase().includes(texto) || p.codigo.toLowerCase().includes(texto)) &&
+                (cat === "" || p.categoria === cat)
+            );
+            render(filtrados);
         }
-
         window.onload = cargarDatos;
     </script>
 </body>
