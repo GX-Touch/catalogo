@@ -54,33 +54,29 @@
         async function cargarDatos() {
             const params = new URLSearchParams(window.location.search);
             const serial = params.get('serial');
-            if(!serial) return;
+            if(!serial) { document.getElementById('loading').textContent = "Error: Falta el parámetro 'serial'."; return; }
 
             try {
                 const response = await fetch(`data/${serial.toLowerCase()}.js?t=${new Date().getTime()}`);
-                const data = JSON.parse((await response.text()).trim().replace(/^\uFEFF/, ''));
+                const texto = await response.text();
+                const data = JSON.parse(texto.trim().replace(/^\uFEFF/, ''));
                 
-                // Cargar Info básica
+                // Info Básica
                 document.getElementById('nombre-tienda').textContent = data.tienda;
                 document.getElementById('rif-tienda').textContent = data.rif;
                 document.getElementById('contacto-tienda').textContent = "WhatsApp: " + data.telefono_ws;
                 
-                // Mostrar Franja Aviso
-                if (data.texto_aviso) {
-                    const franja = document.getElementById('franja-info');
-                    franja.classList.remove('hidden');
+                // Mostrar Avisos
+                if (data.texto_aviso && data.texto_aviso.trim() !== "") {
+                    document.getElementById('franja-info').classList.remove('hidden');
                     document.getElementById('texto-aviso').innerHTML = `<i class="fa-solid fa-circle-info mr-2"></i> ${data.texto_aviso}`;
                 }
-
-                // Mostrar Banner Promo
                 if (data.mostrar_promo === true && data.url_promo) {
-                    const bannerCont = document.getElementById('contenedor-banner');
-                    const bannerImg = document.getElementById('img-banner-promo');
-                    bannerImg.src = data.url_promo;
-                    bannerCont.classList.remove('hidden');
+                    document.getElementById('contenedor-banner').classList.remove('hidden');
+                    document.getElementById('img-banner-promo').src = data.url_promo;
                 }
 
-                // Logo y Otros
+                // Logo
                 const imgLogo = document.getElementById('logo-empresa');
                 if (data.logo && data.logo.length > 5) imgLogo.src = data.logo; else imgLogo.style.display = 'none';
                 
@@ -88,30 +84,57 @@
                 document.getElementById('loading').style.display = 'none';
                 
                 datosGlobales.productos = data.productos;
+                
+                // Llenar Categorías (CORRECCIÓN AQUÍ)
+                const select = document.getElementById('filtro-cat');
+                const categorias = [...new Set(data.productos.map(p => p.categoria))];
+                categorias.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c; opt.textContent = c;
+                    select.appendChild(opt);
+                });
+                
                 render(data.productos);
-            } catch (e) { document.getElementById('loading').innerHTML = "Error: " + e.message; }
+            } catch (e) { document.getElementById('loading').innerHTML = "Error al cargar datos: " + e.message; }
         }
 
-        // ... resto de tus funciones render y filtrar (se mantienen iguales)
         function render(lista) {
             const cont = document.getElementById('contenedor-productos');
             cont.innerHTML = "";
             lista.forEach(p => {
                 const esInactivo = p.activo && p.activo.toUpperCase() === "INACTIVO";
+                const stock = parseFloat(p.stock);
+                let textoEstado = "", claseEstado = "";
+                
+                if (esInactivo) { textoEstado = "No Disponible"; claseEstado = "text-red-600"; }
+                else if (stock > 0) { textoEstado = "Disponible"; claseEstado = "text-green-600"; }
+                else { textoEstado = "Agotado"; claseEstado = "text-red-500"; }
+
                 const precio = (p.origen === 'ESTANDAR') ? 'Bs. ' + parseFloat(p.precioBs).toFixed(2) : '$ ' + parseFloat(p.precio).toFixed(2);
+                
                 cont.innerHTML += `
                     <div class="bg-white p-3 rounded-2xl border shadow-sm">
                         <img src="${p.foto}" class="h-40 sm:h-48 w-full object-cover object-center rounded-lg" onerror="this.src='https://placehold.co/128x128?text=Sin+Foto'">
                         <p class="text-[10px] font-bold text-slate-400 mt-2">${p.codigo}</p>
                         <h3 class="text-sm font-medium h-10 line-clamp-2">${p.detalle}</h3>
                         <p class="text-lg font-bold text-[#2e1065] my-1">${precio}</p>
-                        <a href="https://wa.me/${p.tel}?text=¡Hola! 👋 Me interesa el producto: *${p.detalle}* (Ref: ${p.codigo})." class="block mt-3 w-full ${esInactivo ? 'bg-slate-400' : 'bg-slate-800'} text-white text-center py-2 rounded-lg text-[10px] font-bold">
+                        <p class="text-xs font-bold ${claseEstado}">${textoEstado}</p>
+                        <a href="https://wa.me/${p.tel}?text=¡Hola! 👋 Me interesa el producto: *${p.detalle}* (Ref: ${p.codigo})." class="block mt-3 w-full ${esInactivo ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-800'} text-white text-center py-2 rounded-lg text-[10px] font-bold">
                             <i class="fa-brands fa-whatsapp"></i> CONSULTAR
                         </a>
                     </div>`;
             });
         }
-        function filtrar() { /* Tu función filtrar original */ }
+
+        function filtrar() {
+            const t = document.getElementById('buscador').value.toLowerCase();
+            const c = document.getElementById('filtro-cat').value;
+            render(datosGlobales.productos.filter(p => 
+                (p.detalle.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t)) && 
+                (c === "" || p.categoria === c)
+            ));
+        }
+
         window.onload = cargarDatos;
     </script>
 </body>
