@@ -13,9 +13,10 @@
     
     <header class="bg-[#2e1065] text-white sticky top-0 z-50 shadow-md">
         <div class="max-w-4xl mx-auto px-4 py-4 relative">
-            <h1 id="nombre-tienda" class="text-lg font-bold">CARGANDO...</h1>
-            <p id="rif-tienda" class="text-[10px] text-violet-300 font-bold"></p>
-            <p id="contacto-tienda" class="text-xs text-violet-200 mt-1"></p>
+            <!-- Títulos con ajuste responsivo para PC -->
+            <h1 id="nombre-tienda" class="text-lg md:text-2xl font-bold">CARGANDO...</h1>
+            <p id="rif-tienda" class="text-[10px] md:text-sm text-violet-300 font-bold"></p>
+            <p id="contacto-tienda" class="text-xs md:text-base text-violet-200 mt-1"></p>
             
             <div class="absolute top-4 right-4">
                 <img id="logo-empresa" src="" class="h-16 w-16 object-contain bg-white rounded-full border-2 border-violet-300 shadow-lg">
@@ -67,7 +68,6 @@
                     imgLogo.style.display = 'none';
                 }
                 
-                // Mensaje General Profesional
                 document.getElementById('btn-whatsapp-general').href = `https://wa.me/${data.telefono_ws}?text=¡Hola! 👋 Vi el catálogo de *${data.tienda}* y me gustaría recibir más información.`;
                 document.getElementById('loading').style.display = 'none';
                 
