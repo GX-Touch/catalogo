@@ -16,27 +16,21 @@
             <h1 id="nombre-tienda" class="text-lg md:text-2xl font-bold">CARGANDO...</h1>
             <p id="rif-tienda" class="text-[10px] md:text-sm text-violet-300 font-bold"></p>
             <p id="contacto-tienda" class="text-xs md:text-base text-violet-200 mt-1"></p>
-            
-            <div class="absolute top-4 right-4">
-                <img id="logo-empresa" src="" class="h-16 w-16 object-contain bg-white rounded-full border-2 border-violet-300 shadow-lg">
-            </div>
-            
+            <div class="absolute top-4 right-4"><img id="logo-empresa" src="" class="h-16 w-16 object-contain bg-white rounded-full border-2 border-violet-300 shadow-lg"></div>
             <div class="flex gap-2 mt-3 relative">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
                 <input type="text" id="buscador" onkeyup="filtrar()" placeholder="Buscar producto..." class="w-full p-2 pl-9 rounded-lg text-slate-900 text-sm">
-                <select id="filtro-cat" onchange="filtrar()" class="p-2 rounded-lg text-slate-900 text-sm">
-                    <option value="">Categorías</option>
-                </select>
+                <select id="filtro-cat" onchange="filtrar()" class="p-2 rounded-lg text-slate-900 text-sm"><option value="">Categorías</option></select>
             </div>
         </div>
     </header>
 
-    <div id="franja-info" class="bg-slate-200 py-2 px-4 text-center border-b border-slate-300 hidden">
-        <p id="texto-aviso" class="text-xs md:text-sm font-bold text-slate-700 tracking-wide uppercase"></p>
-    </div>
+    <div id="franja-info" class="bg-slate-200 py-2 px-4 text-center border-b border-slate-300 hidden"><p id="texto-aviso" class="text-xs md:text-sm font-bold text-slate-700 tracking-wide uppercase"></p></div>
 
-    <div id="contenedor-banner" class="max-w-4xl mx-auto px-4 pt-4 hidden">
-        <img id="img-banner-promo" src="" class="w-full rounded-2xl shadow-md">
+    <div id="contenedor-banner" class="max-w-4xl mx-auto px-4 pt-4 hidden relative overflow-hidden">
+        <div id="carrusel-imagenes" class="flex transition-transform duration-500 rounded-2xl shadow-md"></div>
+        <button id="btn-prev" class="absolute left-6 top-1/2 -translate-y-1/2 bg-white/50 p-2 rounded-full hidden"><i class="fa-solid fa-chevron-left"></i></button>
+        <button id="btn-next" class="absolute right-6 top-1/2 -translate-y-1/2 bg-white/50 p-2 rounded-full hidden"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 
     <main class="max-w-4xl mx-auto px-4 py-6">
@@ -69,29 +63,33 @@
                     document.getElementById('franja-info').classList.remove('hidden');
                     document.getElementById('texto-aviso').innerHTML = `<i class="fa-solid fa-circle-info mr-2"></i> ${data.texto_aviso}`;
                 }
-                if (data.mostrar_promo === true && data.url_promo) {
-                    document.getElementById('contenedor-banner').classList.remove('hidden');
-                    document.getElementById('img-banner-promo').src = data.url_promo;
+                
+                // Lógica del Slider Inteligente
+                if (data.mostrar_promo === true && data.imagenes_promo && data.imagenes_promo.length > 0) {
+                    const cont = document.getElementById('contenedor-banner');
+                    const carrusel = document.getElementById('carrusel-imagenes');
+                    cont.classList.remove('hidden');
+                    data.imagenes_promo.forEach(url => carrusel.innerHTML += `<img src="${url}" class="w-full flex-shrink-0 object-cover">`);
+                    
+                    if (data.imagenes_promo.length > 1) {
+                        document.getElementById('btn-prev').classList.remove('hidden');
+                        document.getElementById('btn-next').classList.remove('hidden');
+                        let index = 0;
+                        document.getElementById('btn-next').onclick = () => { index = (index + 1) % data.imagenes_promo.length; carrusel.style.transform = `translateX(-${index * 100}%)`; };
+                        document.getElementById('btn-prev').onclick = () => { index = (index - 1 + data.imagenes_promo.length) % data.imagenes_promo.length; carrusel.style.transform = `translateX(-${index * 100}%)`; };
+                    }
                 }
 
                 const imgLogo = document.getElementById('logo-empresa');
                 if (data.logo && data.logo.length > 5) imgLogo.src = data.logo; else imgLogo.style.display = 'none';
-                
                 document.getElementById('btn-whatsapp-general').href = `https://wa.me/${data.telefono_ws}?text=${encodeURIComponent('¡Hola! 👋 Vi el catálogo de *' + data.tienda + '* y me gustaría recibir más información.')}`;
                 document.getElementById('loading').style.display = 'none';
                 
                 datosGlobales.productos = data.productos;
-                
                 const select = document.getElementById('filtro-cat');
-                const categorias = [...new Set(data.productos.map(p => p.categoria))];
-                categorias.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c; opt.textContent = c;
-                    select.appendChild(opt);
-                });
-                
+                [...new Set(data.productos.map(p => p.categoria))].forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.appendChild(opt); });
                 render(data.productos);
-            } catch (e) { document.getElementById('loading').innerHTML = "Error al cargar datos: " + e.message; }
+            } catch (e) { document.getElementById('loading').innerHTML = "Error: " + e.message; }
         }
 
         function render(lista) {
@@ -99,23 +97,14 @@
             cont.innerHTML = "";
             lista.forEach(p => {
                 const esInactivo = p.activo && p.activo.toUpperCase() === "INACTIVO";
-                const stock = parseFloat(p.stock);
-                let textoEstado = "", claseEstado = "";
-                
-                if (esInactivo) { textoEstado = "No Disponible"; claseEstado = "text-red-600"; }
-                else if (stock > 0) { textoEstado = "Disponible"; claseEstado = "text-green-600"; }
-                else { textoEstado = "Agotado"; claseEstado = "text-red-500"; }
-
                 const precio = (p.origen === 'ESTANDAR') ? 'Bs. ' + parseFloat(p.precioBs).toFixed(2) : '$ ' + parseFloat(p.precio).toFixed(2);
-                
                 cont.innerHTML += `
                     <div class="bg-white p-3 rounded-2xl border shadow-sm">
-                        <img src="${p.foto}" class="h-40 sm:h-48 w-full object-cover object-center rounded-lg" onerror="this.src='https://placehold.co/128x128?text=Sin+Foto'">
+                        <img src="${p.foto}" class="h-40 w-full object-cover rounded-lg" onerror="this.src='https://placehold.co/128x128?text=Sin+Foto'">
                         <p class="text-[10px] font-bold text-slate-400 mt-2">${p.codigo}</p>
                         <h3 class="text-sm font-medium h-10 line-clamp-2">${p.detalle}</h3>
                         <p class="text-lg font-bold text-[#2e1065] my-1">${precio}</p>
-                        <p class="text-xs font-bold ${claseEstado}">${textoEstado}</p>
-                        <a href="https://wa.me/${p.tel}?text=${encodeURIComponent('¡Hola! 👋 Me interesa el producto: *' + p.detalle + '* (Ref: ' + p.codigo + '). ¿Podrías darme más detalles o disponibilidad?')}" class="block mt-3 w-full ${esInactivo ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-800'} text-white text-center py-2 rounded-lg text-[10px] font-bold">
+                        <a href="https://wa.me/${p.tel}?text=${encodeURIComponent('¡Hola! 👋 Me interesa: *' + p.detalle + '* (Ref: ' + p.codigo + ')?.')}" class="block mt-3 w-full ${esInactivo ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-800'} text-white text-center py-2 rounded-lg text-[10px] font-bold">
                             <i class="fa-brands fa-whatsapp"></i> CONSULTAR
                         </a>
                     </div>`;
@@ -125,12 +114,8 @@
         function filtrar() {
             const t = document.getElementById('buscador').value.toLowerCase();
             const c = document.getElementById('filtro-cat').value;
-            render(datosGlobales.productos.filter(p => 
-                (p.detalle.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t)) && 
-                (c === "" || p.categoria === c)
-            ));
+            render(datosGlobales.productos.filter(p => (p.detalle.toLowerCase().includes(t) || p.codigo.toLowerCase().includes(t)) && (c === "" || p.categoria === c)));
         }
-
         window.onload = cargarDatos;
     </script>
 </body>
