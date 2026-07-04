@@ -1,0 +1,26 @@
+{
+  "SERIAL_PC_001": {
+    "info": {
+      "serialUnico": "SERIAL_PC_001",
+      "nombreEmpresa": "Nombre Empresa",
+      "rif": "J-12345678",
+      "nombreApellido": "Juan Perez",
+      "telefono": "0414-0000000",
+      "correo": "cliente@correo.com",
+      "direccion": "Av. Principal",
+      "ciudad": "Maturín",
+      "status": "HABILITADO",
+      "fechaActivacion": "2026-07-04"
+    },
+    "adds": {
+      "WhatsApp": 1,
+      "Cantina": 0,
+      "Restaurante": 1,
+      "Catalogo": 1,
+      "AppCredito": 0,
+      "ConsultorP": 0,
+      "VisorP": 0,
+      "AdminNor": 0
+    }
+  }
+}
