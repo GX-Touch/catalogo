@@ -1,6 +1,5 @@
 {
   "C8A73430": {
-    "info": {
       "serialUnico": "C8A73430",
       "nombreEmpresa": "Nombre Empresa",
       "rif": "J-12345678",
@@ -10,9 +9,7 @@
       "direccion": "Av. Principal",
       "ciudad": "Maturín",
       "status": "HABILITADO",
-      "fechaActivacion": "2026-07-04"
-    },
-    "adds": {
+      "fechaActivacion": "2026-07-04",
       "WhatsApp": 0,
       "Cantina": 0,
       "Restaurante": 0,
@@ -21,6 +18,5 @@
       "ConsultorP": 0,
       "VisorP": 0,
       "AdminNor": 0
-    }
   }
 }
