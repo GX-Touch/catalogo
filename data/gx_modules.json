@@ -13,10 +13,10 @@
       "fechaActivacion": "2026-07-04"
     },
     "adds": {
-      "WhatsApp": 1,
+      "WhatsApp": 0,
       "Cantina": 0,
-      "Restaurante": 1,
-      "Catalogo": 1,
+      "Restaurante": 0,
+      "Catalogo": 0,
       "AppCredito": 0,
       "ConsultorP": 0,
       "VisorP": 0,
