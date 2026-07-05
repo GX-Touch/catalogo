@@ -1,6 +1,6 @@
 {
   "322385AF": {
-      "--- COMENTARIO ---": "CLIENTE: FRANK CARIDAD - MATURIN",
+      "--- COMENTARIO ---": "CLIENTE: FRANK CARIDAD - MATURIN HABILITADO - BLOQUEADO",
       "serialUnico": "322385AF",
       "nombreEmpresa": "Nombre Empresa JSON",
       "rif": "J-12345678",
@@ -9,7 +9,7 @@
       "correo": "cliente@correo.com",
       "direccion": "Av. Principal",
       "ciudad": "Maturín",
-      "status": "HABILITADO",
+      "status": "BLOQUEADO",
       "fechaActivacion": "2026-07-04",
       "WhatsApp": 0,
       "Cantina": 0,
