@@ -1,7 +1,8 @@
 {
   "322385AF": {
+      "--- COMENTARIO ---": "CLIENTE: FRANK CARIDAD - MATURIN",
       "serialUnico": "322385AF",
-      "nombreEmpresa": "Nombre Empresa",
+      "nombreEmpresa": "Nombre Empresa JSON",
       "rif": "J-12345678",
       "nombreApellido": "Juan Perez",
       "telefono": "0414-0000000",
@@ -18,5 +19,10 @@
       "ConsultorP": 0,
       "VisorP": 0,
       "AdminNor": 0
+  },
+
+  "OTRO_SERIAL_AQUI": {
+      "--- COMENTARIO ---": "CLIENTE: OTRO EJEMPLO",
+      "serialUnico": "OTRO_SERIAL_AQUI",
   }
 }
