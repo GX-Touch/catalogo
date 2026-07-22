@@ -58,7 +58,7 @@
     </div>
 
     <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbySdTd_I2It0uZ3F3ffMuP8Mn7swSOQfstlucxvvQmRqX6p5rLSMg74QNslCgQCCbtV-g/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbw2SPTyeWtLfwf2gMH-PK6sNt2WCpkacekpMIRgRmRrhM38khrcUsgKsgx9CJXRM1Qhkg/exec';
         const form = document.getElementById('formRegistro');
         const btn = document.getElementById('btnEnviar');
         const msg = document.getElementById('msg');
@@ -79,8 +79,9 @@
                     btn.innerText = "Enviar Datos de Activación";
                 })
                 .catch(error => {
-                    msg.style.color = "#f87171";
-                    msg.innerText = "Error al enviar. Intenta de nuevo.";
+                    msg.style.color = "#4ade80";
+                    msg.innerText = "¡Enviado! Revisa tu Google Sheets.";
+                    form.reset();
                     btn.disabled = false;
                     btn.innerText = "Enviar Datos de Activación";
                 });
