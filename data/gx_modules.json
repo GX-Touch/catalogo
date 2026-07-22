@@ -23,8 +23,51 @@
       "AdminNor": "0"
   },
 
-  "OTRO_SERIAL_AQUI": {
-      "--- COMENTARIO ---": "CLIENTE: OTRO EJEMPLO",
-      "serialUnico": "OTRO_SERIAL_AQUI",
+  "123456": {
+      "--- COMENTARIO ---": "HABILITADO BLOQUEADO",
+      "serialUnico": "123456",
+      "nombreEmpresa": "Nombre Empresa JSON",
+      "rif": "J-12345678",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Juan Perez",
+      "telefono": "0414-0000000",
+      "correo": "cliente@correo.com",
+      "direccion": "Av. Principal",
+      "ciudad": "Maturín",
+      "status": "HABILITADO",
+      "fechaActivacion": "2026-07-04",
+      "fechaVencimiento": "2050-07-04",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0"
+     },
+
+  "7890": {
+      "--- COMENTARIO ---": "HABILITADO BLOQUEADO",
+      "serialUnico": "7890",
+      "nombreEmpresa": "Nombre Empresa JSON",
+      "rif": "J-12345678",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Juan Perez",
+      "telefono": "0414-0000000",
+      "correo": "cliente@correo.com",
+      "direccion": "Av. Principal",
+      "ciudad": "Maturín",
+      "status": "HABILITADO",
+      "fechaActivacion": "2026-07-04",
+      "fechaVencimiento": "2050-07-04",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0"
   }
 }
