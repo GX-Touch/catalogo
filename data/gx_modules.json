@@ -47,19 +47,19 @@
       "AdminNor": "0"
      },
 
-  "7890": {
+  "8A6F118D": {
       "--- COMENTARIO ---": "HABILITADO BLOQUEADO",
-      "serialUnico": "7890",
-      "nombreEmpresa": "Nombre Empresa JSON",
-      "rif": "J-12345678",
+      "serialUnico": "8A6F118D",
+      "nombreEmpresa": "Servicio Técnico GG",
+      "rif": "797979004",
       "cajaV": "CAJA 1",
-      "nombreApellido": "Juan Perez",
-      "telefono": "0414-0000000",
+      "nombreApellido": "Lewis Mata",
+      "telefono": "04225836169",
       "correo": "cliente@correo.com",
-      "direccion": "Av. Principal",
-      "ciudad": "Maturín",
+      "direccion": "Calle Bermúdez Sector Centro",
+      "ciudad": "Maturín Monagas",
       "status": "HABILITADO",
-      "fechaActivacion": "2026-07-04",
+      "fechaActivacion": "2026-07-22",
       "fechaVencimiento": "2050-07-04",
       "WhatsApp": "0",
       "Cantina": "0",
