@@ -7,7 +7,14 @@
     <style>
         body { font-family: sans-serif; background: #0f172a; color: #f8fafc; padding: 20px; display: flex; justify-content: center; }
         .form-container { width: 100%; max-width: 500px; background: #1e293b; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        h2 { text-align: center; color: #38bdf8; margin-bottom: 20px; }
+        
+        /* Estilos para la cabecera con logo y subtítulo */
+        .header-box { text-align: center; margin-bottom: 25px; }
+        .logo-title-container { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .logo-title-container img { width: 45px; height: 45px; object-fit: contain; }
+        h2 { color: #38bdf8; margin: 0; font-size: 24px; }
+        .subtitulo { font-size: 13px; color: #64748b; margin-top: 6px; letter-spacing: 0.5px; }
+
         label { display: block; margin-top: 12px; font-size: 14px; color: #94a3b8; }
         input { width: 100%; padding: 10px; margin-top: 5px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; margin-top: 20px; background: #0284c7; color: white; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
@@ -17,7 +24,15 @@
 </head>
 <body>
     <div class="form-container">
-        <h2>Registro GX-TOUCH</h2>
+        <!-- Cabecera con Logo, Título y Subtítulo -->
+        <div class="header-box">
+            <div class="logo-title-container">
+                <img src="https://raw.githubusercontent.com/GX-Touch/catalogo/main/img/LogoGXWeb.png" alt="Logo GX">
+                <h2>Registrar Datos para Activar su Sistema</h2>
+            </div>
+            <div class="subtitulo">GX-Touch Intelligent POS</div>
+        </div>
+
         <form id="formRegistro">
             <label>RIF Empresa:</label>
             <input type="text" name="rif" required placeholder="Ej: J-12345678-9">
@@ -40,19 +55,19 @@
             <label>Ciudad y Estado:</label>
             <input type="text" name="ciudad" required placeholder="Ej: Maturin, Monagas">
 
-            <label>Serial de Activación:</label>
-            <input type="text" name="serial" required placeholder="Serial del disco / cliente">
+            <label>Código que genera su sistema:</label>
+            <input type="text" name="serial" required placeholder="Copie aquí codigo generado">
 
             <label>Referencia de Pago (Opcional):</label>
             <input type="text" name="referencia" placeholder="Nro de operación o transferencia">
 
             <label>Monto (Opcional):</label>
-            <input type="text" name="monto" placeholder="Monto cancelado">
+            <input type="text" name="monto" placeholder="Monto pagado">
 
             <label>Fecha de Pago (Opcional):</label>
             <input type="date" name="fecha_pago">
 
-            <button type="submit" id="btnEnviar">Enviar Datos de Activación</button>
+            <button type="submit" id="btnEnviar">Enviar Datos Solicitar Activación</button>
             <div class="msg" id="msg"></div>
         </form>
     </div>
@@ -76,14 +91,14 @@
                     msg.innerText = "¡Registrado con éxito! Ya puedes cerrar.";
                     form.reset();
                     btn.disabled = false;
-                    btn.innerText = "Enviar Datos de Activación";
+                    btn.innerText = "Enviar Datos de Solicitud";
                 })
                 .catch(error => {
                     msg.style.color = "#4ade80";
-                    msg.innerText = "¡Enviado! Revisa tu Google Sheets.";
+                    msg.innerText = "¡Datos Enviado! Espera la respuesta de tu asesor";
                     form.reset();
                     btn.disabled = false;
-                    btn.innerText = "Enviar Datos de Activación";
+                    btn.innerText = "Enviar Datos de Solicitud";
                 });
         });
     </script>
