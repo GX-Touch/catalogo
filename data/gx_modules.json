@@ -93,5 +93,30 @@
       "ConsultorP": "0",
       "VisorP": "0",
       "AdminNor": "0"
+
+},
+
+  "2E9890C5": {
+      "--- COMENTARIO ---": "David Berry Floresta MobileTech",
+      "serialUnico": "2E9890C5",
+      "nombreEmpresa": "Mi Tienda 2",
+      "rif": "ID818181006",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Usuario 01",
+      "telefono": "4140000000",
+      "correo": "micorreo@gmail.com",
+      "direccion": "Av. Principal La Floresta",
+      "ciudad": "Maturín Monagas",
+      "status": "HABILITADO",
+      "fechaActivacion": "05/08/2026",
+      "fechaVencimiento": "05/08/2027",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "1",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0"
   }
 }
