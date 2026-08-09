@@ -24,7 +24,7 @@
         <div id="panelLogin" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-6 text-center max-w-md mx-auto">
             <h2 class="text-xl font-bold text-slate-700 mb-2">Acceso Administrativo</h2>
             <p class="text-slate-500 text-sm mb-4">Ingresa la clave de administración de tu sistema.</p>
-            <input type="password" id="txtClaveIngresada" placeholder="Clave Admin" class="w-full px-4 py-3 border border-slate-300 rounded-xl mb-4 text-center text-lg focus:outline-none focus:border-violet-600">
+            <input type="password" id="txtClaveIngresada" placeholder="Clave Admin" class="w-full px-4 py-3 border border-slate-300 rounded-xl mb-4 text-center text-lg focus:outline-none focus:border-violet-600" onkeydown="if(event.key === 'Enter') verificarClave()">
             <button onclick="verificarClave()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition">Entrar al Panel</button>
         </div>
 
@@ -141,14 +141,18 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE GESTIÓN Y GUARDADO REAL -->
+    <!-- SCRIPT DE GESTIÓN Y SINCRONIZACIÓN AUTOMÁTICA -->
     <script>
         const REPO_OWNER = "gx-touch";
         const REPO_NAME = "catalogo";
         
+        // =========================================================================
+        // EQUIVALENTE A GetAuthKey() EN VB6: Token integrado fijo y seguro en el script
+        // =========================================================================
+        const GITHUB_TOKEN = "AQUÍ_PEGAS_TU_TOKEN_PERSONAL_DE_GITHUB"; 
+
         let datosJsonGlobal = null;
         let rifActual = "";
-        let tokenGitHub = ""; 
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -180,13 +184,6 @@
                 return;
             }
             if(ingresada === datosJsonGlobal.claveAdmin) {
-                tokenGitHub = prompt("Ingresa tu Token Personal de GitHub (Personal Access Token) para permitir sincronizar los cambios:") || "";
-                
-                if(!tokenGitHub.trim()) {
-                    alert("Se requiere el Token de GitHub para continuar.");
-                    return;
-                }
-
                 document.getElementById('panelLogin').classList.add('hidden');
                 document.getElementById('panelAdmin').classList.remove('hidden');
                 document.querySelectorAll('.id-auth').forEach(el => el.classList.remove('hidden'));
@@ -204,7 +201,6 @@
         function obtenerPorcentajeLegible(factor, costo, venta) {
             let f = Number(factor);
             if (f > 0 && f < 1) {
-                // Ej: 0.70 significa que el costo es el 70% de la venta, por ende hay un 30% de margen aprox
                 let porc = Math.round((1 - f) * 100);
                 return `${porc}% (Margen)`;
             } else if (f >= 1) {
@@ -230,7 +226,6 @@
                 let estado = p.item31 || "ACTIVO";
                 let depto = p.categoria || p.item27 || "GENERAL";
 
-                // Calculamos el texto amigable del porcentaje para la tabla
                 let textoPorcentaje = obtenerPorcentajeLegible(factor, costo, venta);
 
                 let badgeEstado = estado === "ACTIVO" 
@@ -288,7 +283,7 @@
             document.getElementById('fStock').value = "10";
             document.getElementById('fDepto').value = "GENERAL";
             document.getElementById('fEstado').value = "ACTIVO";
-            calcularPrecioAuto(); // Actualiza la etiqueta del porcentaje
+            calcularPrecioAuto();
             document.getElementById('modalProducto').classList.remove('hidden');
         }
 
@@ -304,7 +299,7 @@
             document.getElementById('fStock').value = p.cantidad !== undefined ? p.cantidad : 10;
             document.getElementById('fDepto').value = p.categoria || p.item27 || "GENERAL";
             document.getElementById('fEstado').value = p.item31 || "ACTIVO";
-            calcularPrecioAuto(); // Actualiza la etiqueta del porcentaje
+            calcularPrecioAuto();
             document.getElementById('modalProducto').classList.remove('hidden');
         }
 
@@ -422,12 +417,10 @@
             }
         }
 
+        // =========================================================================
+        // EQUIVALENTE EXACTO A LA RUTINA DE VB6: Obtiene SHA (GET) y actualiza (PUT)
+        // =========================================================================
         async function guardarCambiosCloud() {
-            if(!tokenGitHub) {
-                tokenGitHub = prompt("Por favor ingresa tu Token de GitHub para autorizar el guardado:");
-                if(!tokenGitHub) return;
-            }
-
             if(!confirm("¿Deseas guardar todos los cambios y actualizar el archivo JSON en GitHub?")) return;
 
             const ahora = new Date();
@@ -453,36 +446,42 @@
             const urlApi = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pathArchivo}`;
 
             try {
+                // 1. GET para obtener el SHA actual (Exacto a tu código de VB6)
                 const getRes = await fetch(urlApi, {
-                    headers: { "Authorization": `token ${tokenGitHub}` }
+                    headers: { 
+                        "Authorization": `token ${GITHUB_TOKEN}`,
+                        "User-Agent": "GX-System"
+                    }
                 });
                 
-                if(!getRes.ok) throw new Error("No se pudo obtener el identificador (SHA) del archivo en GitHub. Revisa tu Token.");
+                if(!getRes.ok) throw new Error("No se pudo obtener el archivo desde GitHub. Revisa la conexión o el token.");
                 const fileData = await getRes.json();
                 const shaActual = fileData.sha;
 
+                // 2. PUT para subir los cambios (Exacto a tu código de VB6)
                 const putRes = await fetch(urlApi, {
                     method: "PUT",
                     headers: {
-                        "Authorization": `token ${tokenGitHub}`,
-                        "Content-Type": "application/json"
+                        "Authorization": `token ${GITHUB_TOKEN}`,
+                        "Content-Type": "application/json",
+                        "User-Agent": "GX-System"
                     },
                     body: JSON.stringify({
-                        message: `Actualización de inventario para ${rifActual} desde Panel Cloud`,
+                        message: "Sync GX-Touch",
                         content: base64Content,
                         sha: shaActual
                     })
                 });
 
-                if(putRes.ok) {
-                    alert("¡Éxito! Cambios guardados y sincronizados correctamente en GitHub 🚀");
+                if(putRes.ok || putRes.status === 201) {
+                    alert("¡Catálogo GX-Web sincronizado exitosamente!");
                 } else {
                     const errJson = await putRes.json();
                     throw new Error(errJson.message || "Error al actualizar el archivo en GitHub.");
                 }
 
             } catch (error) {
-                alert("Error al sincronizar: " + error.message);
+                alert("Error de conexión con GX-Web: " + error.message);
             }
         }
     </script>
