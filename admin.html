@@ -42,7 +42,7 @@
             <!-- TABLA DE PRODUCTOS -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Inventario Detallado Local</h3>
+                    <h3 class="font-bold text-slate-700">Inventario Detallado</h3>
                     <span id="contadorProductos" class="text-xs bg-violet-100 text-violet-700 font-bold px-2.5 py-1 rounded-full">0 productos</span>
                 </div>
                 <div class="overflow-x-auto">
@@ -141,7 +141,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE GESTIÓN LOCAL -->
+    <!-- SCRIPT PRINCIPAL DE LÓGICA WEB -->
     <script>
         let datosJsonGlobal = null;
         let rifActual = "";
@@ -149,21 +149,25 @@
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             rifActual = urlParams.get('rif') || 'productos';
-            cargarJsonLocal();
+            cargarJsonDesdeGitHub();
         }
 
-        async function cargarJsonLocal() {
+        async function cargarJsonDesdeGitHub() {
             try {
-                // Intenta cargar el JSON local correspondiente (ej. ?rif=V12345678 cargará V12345678.json)
-                const url = `./${rifActual}.json?t=` + new Date().getTime(); 
+                // Configura tu usuario y repositorio aquí:
+                const usuario = "TU_USUARIO_GITHUB";
+                const repositorio = "TU_REPOSITORIO_GITHUB";
+                
+                // Lee la versión en vivo que GX subió a GitHub (Raw view)
+                const url = `https://raw.githubusercontent.com/${usuario}/${repositorio}/main/${rifActual}.json?t=` + new Date().getTime(); 
+                
                 const response = await fetch(url);
-                if(!response.ok) throw new Error("No se encontró el archivo JSON local. Asegúrate de colocarlo en la misma carpeta.");
+                if(!response.ok) throw new Error("No se pudo obtener el archivo desde GitHub. Revisa el RIF en la URL.");
                 
                 datosJsonGlobal = await response.json();
                 document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa || rifActual}`;
             } catch (error) {
-                alert("Aviso: " + error.message + "\nSe inicializará una estructura base vacía para pruebas.");
-                // Estructura base de respaldo por si el archivo no existe todavía
+                alert("Aviso: " + error.message + "\nSe creará una estructura temporal de respaldo.");
                 datosJsonGlobal = {
                     "rifEmpresa": rifActual.toUpperCase(),
                     "claveAdmin": "1234",
@@ -179,7 +183,7 @@
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
             if(!datosJsonGlobal) {
-                alert("Cargando datos, espera un momento...");
+                alert("Cargando datos desde GitHub, espera un momento...");
                 return;
             }
             if(ingresada === (datosJsonGlobal.claveAdmin || "1234")) {
@@ -419,7 +423,7 @@
         // FUNCIÓN DE DESCARGA LOCAL PARA C:/ShopLite/
         // =========================================================================
         function descargarJsonLocal() {
-            if(!confirm("¿Deseas generar el archivo JSON actualizado? Recuerda guardarlo directamente en tu carpeta C:\\ShopLite\\")) return;
+            if(!confirm("¿Deseas generar el archivo JSON actualizado? Recuerda guardarlo directamente en la carpeta C:\\ShopLite\\ de tu PC")) return;
 
             // Generar fecha y hora exacta con el formato YYYY-MM-DD HH:MM:SS
             const ahora = new Date();
@@ -432,15 +436,14 @@
             
             datosJsonGlobal.ultimaActualizacion = fechaHoraStr;
 
-            // Convertir objeto a texto JSON ordenado
+            // Convertir objeto a texto JSON
             const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
             
-            // Crear un blob y forzar la descarga en el navegador
+            // Forzar descarga directa
             const blob = new Blob([jsonText], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             
-            // Nombre sugerido del archivo basado en el RIF
             a.href = url;
             a.download = `${datosJsonGlobal.rifEmpresa || 'productos'}.json`;
             document.body.appendChild(a);
@@ -448,7 +451,7 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            alert(`¡JSON generado con éxito!\n\nFecha/Hora de marca: ${fechaHoraStr}\n\nPor favor, asegúrate de colocar/guardar este archivo descargado directamente en tu ruta local: C:\\ShopLite\\`);
+            alert(`¡JSON generado con éxito!\n\nFecha/Hora de marca: ${fechaHoraStr}\n\nGuarda este archivo en tu carpeta local: C:\\ShopLite\\`);
         }
     </script>
 </body>
