@@ -10,7 +10,7 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <!-- ENCABEZADO -->
         <div class="bg-[#2e1065] text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
@@ -28,30 +28,35 @@
             <button onclick="verificarClave()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition">Entrar al Panel</button>
         </div>
 
-        <!-- PASO 2: PANEL DE PRODUCTOS Y CONFIGURACIÓN (Oculto hasta autenticarse) -->
+        <!-- PASO 2: PANEL DE PRODUCTOS -->
         <div id="panelAdmin" class="hidden mt-6 space-y-6">
             
             <!-- BARRA DE ACCESOS RÁPIDOS -->
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
-                <button onclick="abrirModalNuevo()" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow">+ Nuevo Producto</button>
+                <button onclick="abrirModalFormulario()" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow flex items-center gap-2">
+                    <span>+ Nuevo Producto</span>
+                </button>
                 <button onclick="abrirModalClave()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-lg font-semibold text-sm">Cambiar Clave Admin</button>
             </div>
 
             <!-- TABLA DE PRODUCTOS -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Inventario en la Nube</h3>
+                    <h3 class="font-bold text-slate-700">Inventario Detallado en la Nube</h3>
                     <span id="contadorProductos" class="text-xs bg-violet-100 text-violet-700 font-bold px-2.5 py-1 rounded-full">0 productos</span>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
                                 <th class="p-3">Código</th>
                                 <th class="p-3">Producto</th>
                                 <th class="p-3 text-right">Costo ($)</th>
-                                <th class="p-3 text-right">Precio ($)</th>
+                                <th class="p-3 text-right">Venta ($)</th>
                                 <th class="p-3 text-center">Stock</th>
+                                <th class="p-3 text-center">Ganancia</th>
+                                <th class="p-3 text-center">Estado</th>
+                                <th class="p-3">Departamento</th>
                                 <th class="p-3 text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -71,7 +76,67 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE GESTIÓN OPTIMIZADO -->
+    <!-- MODAL / FORMULARIO FLOTANTE PARA NUEVO/EDITAR PRODUCTO -->
+    <div id="modalProducto" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-100">
+            <h3 id="modalTitulo" class="text-xl font-bold text-slate-800 border-b pb-2">Nuevo Producto</h3>
+            
+            <input type="hidden" id="editIndex" value="-1">
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Código</label>
+                    <input type="text" id="fCodigo" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none font-mono text-sm" placeholder="Ej. P001">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Departamento</label>
+                    <input type="text" id="fDepto" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="GENERAL">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre / Descripción del Producto</label>
+                <input type="text" id="fNombre" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" placeholder="Ej. Cable USB Tipo C">
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Costo ($)</label>
+                    <input type="number" step="0.01" id="fCosto" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="1.00">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Ganancia (%) o Factor</label>
+                    <input type="number" step="0.01" id="fGanancia" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="30">
+                    <span class="text-[10px] text-slate-400">Ej: 30 para % o 1.30 para factor</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Precio Venta ($)</label>
+                    <input type="number" step="0.01" id="fVenta" class="w-full px-3 py-2 border rounded-xl font-bold text-violet-700 bg-violet-50 focus:outline-none text-sm" value="1.30">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Stock Inicial</label>
+                    <input type="number" id="fStock" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="10">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label>
+                    <select id="fEstado" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm bg-white">
+                        <option value="ACTIVO">ACTIVO</option>
+                        <option value="INACTIVO">INACTIVO</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <button onclick="cerrarModalFormulario()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm">Cancelar</button>
+                <button onclick="guardarProductoModal()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow">Guardar Producto</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE GESTIÓN -->
     <script>
         const REPO_OWNER = "gx-touch";
         const REPO_NAME = "catalogo";
@@ -91,14 +156,11 @@
 
         async function cargarJsonGitHub() {
             try {
-                // Ruta relativa directa al archivo JSON dentro de la carpeta productos
                 const url = `./productos/${rifActual}.json`;
-                
                 const response = await fetch(url);
                 if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
                 
                 datosJsonGlobal = await response.json();
-
                 document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
             } catch (error) {
                 alert("Error cargando datos: " + error.message);
@@ -108,7 +170,7 @@
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
             if(!datosJsonGlobal) {
-                alert("Aún no se han cargado los datos de la nube. Espera un segundo.");
+                alert("Aún no se han cargado los datos. Espera un segundo.");
                 return;
             }
             if(ingresada === datosJsonGlobal.claveAdmin) {
@@ -131,97 +193,187 @@
             document.getElementById('contadorProductos').innerText = `${datosJsonGlobal.productos.length} productos`;
 
             datosJsonGlobal.productos.forEach((p, index) => {
+                let costo = Number(p.precosdol || p.item13 || 0);
+                let venta = Number(p.dola || p.preciodol || p.item24 || 0);
+                let stock = p.cantidad !== undefined ? p.cantidad : 0;
+                let porcentaje = p.porcen || p.item26 || 30;
+                let estado = p.item31 || "ACTIVO";
+                let depto = p.categoria || p.item27 || "GENERAL";
+
+                let badgeEstado = estado === "ACTIVO" 
+                    ? `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs font-bold">Activo</span>`
+                    : `<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full text-xs font-bold">Inactivo</span>`;
+
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50">
                         <td class="p-3 font-mono text-xs text-slate-500">${p.codigo}</td>
                         <td class="p-3 font-medium">${p.producto}</td>
-                        <td class="p-3 text-right font-mono">$${Number(p.precosdol).toFixed(2)}</td>
-                        <td class="p-3 text-right font-mono font-bold text-violet-900">$${Number(p.dola).toFixed(2)}</td>
-                        <td class="p-3 text-center font-semibold">${p.cantidad}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="editarProducto(${index})" class="bg-slate-100 hover:bg-violet-100 text-violet-700 px-3 py-1.5 rounded-lg text-xs font-bold">Editar</button>
+                        <td class="p-3 text-right font-mono">$${costo.toFixed(2)}</td>
+                        <td class="p-3 text-right font-mono font-bold text-violet-900">$${venta.toFixed(2)}</td>
+                        <td class="p-3 text-center font-semibold">${stock}</td>
+                        <td class="p-3 text-center font-mono text-xs text-slate-600">${porcentaje}%</td>
+                        <td class="p-3 text-center">${badgeEstado}</td>
+                        <td class="p-3 text-xs text-slate-600">${depto}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="abrirModalEditar(${index})" class="bg-slate-100 hover:bg-violet-100 text-violet-700 px-2.5 py-1 rounded-lg text-xs font-bold">Editar</button>
+                            <button onclick="eliminarProducto(${index})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold">Eliminar</button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        function editarProducto(index) {
-            let p = datosJsonGlobal.productos[index];
-            let nuevoPrecio = prompt(`Editar Precio ($) para: ${p.producto}`, p.dola);
-            if(nuevoPrecio !== null && !isNaN(nuevoPrecio)) {
-                p.dola = parseFloat(nuevoPrecio);
-                p.precioventa = p.dola * (datosJsonGlobal.tasaBcv || 36);
-                p.item24 = p.dola;
-                p.item34 = p.precioventa;
-                renderizarTabla();
+        // CÁLCULO AUTOMÁTICO DE PRECIO (Soporta porcentaje ej: 30 o factor ej: 1.30)
+        function calcularPrecioAuto() {
+            let costo = parseFloat(document.getElementById('fCosto').value) || 0;
+            let valGanancia = parseFloat(document.getElementById('fGanancia').value) || 0;
+            let venta = 0;
+
+            if (valGanancia > 0 && valGanancia < 3) {
+                // Si colocan un factor como 1.30 o 0.70
+                venta = costo * valGanancia;
+            } else {
+                // Si colocan un porcentaje tradicional como 30 (%)
+                venta = costo * (1 + (valGanancia / 100));
             }
+            document.getElementById('fVenta').value = venta.toFixed(2);
         }
 
-        function abrirModalNuevo() {
-            let codigo = prompt("Código del nuevo producto:");
-            if(!codigo) return;
-            let nombre = prompt("Nombre/Descripción del producto:");
-            if(!nombre) return;
-            let costo = parseFloat(prompt("Costo en dólares ($):", "1.00")) || 0;
-            let precio = parseFloat(prompt("Precio de venta en dólares ($):", "1.50")) || 0;
-            let stock = parseInt(prompt("Cantidad / Stock inicial:", "10")) || 0;
+        function abrirModalFormulario() {
+            document.getElementById('modalTitulo').innerText = "Nuevo Producto";
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('fCodigo').value = "";
+            document.getElementById('fNombre').value = "";
+            document.getElementById('fCosto').value = "1.00";
+            document.getElementById('fGanancia').value = "30";
+            document.getElementById('fVenta').value = "1.30";
+            document.getElementById('fStock').value = "10";
+            document.getElementById('fDepto').value = "GENERAL";
+            document.getElementById('fEstado').value = "ACTIVO";
+            document.getElementById('modalProducto').classList.remove('hidden');
+        }
+
+        function abrirModalEditar(index) {
+            let p = datosJsonGlobal.productos[index];
+            document.getElementById('modalTitulo').innerText = "Editar Producto";
+            document.getElementById('editIndex').value = index;
+            document.getElementById('fCodigo').value = p.codigo || "";
+            document.getElementById('fNombre').value = p.producto || "";
+            document.getElementById('fCosto').value = Number(p.precosdol || p.item13 || 1).toFixed(2);
+            document.getElementById('fGanancia').value = p.porcen || p.item26 || 30;
+            document.getElementById('fVenta').value = Number(p.dola || p.preciodol || 1.30).toFixed(2);
+            document.getElementById('fStock').value = p.cantidad !== undefined ? p.cantidad : 10;
+            document.getElementById('fDepto').value = p.categoria || p.item27 || "GENERAL";
+            document.getElementById('fEstado').value = p.item31 || "ACTIVO";
+            document.getElementById('modalProducto').classList.remove('hidden');
+        }
+
+        function cerrarModalFormulario() {
+            document.getElementById('modalProducto').classList.add('hidden');
+        }
+
+        function guardarProductoModal() {
+            let index = parseInt(document.getElementById('editIndex').value);
+            let codigo = document.getElementById('fCodigo').value.trim();
+            let nombre = document.getElementById('fNombre').value.trim();
+            let costo = parseFloat(document.getElementById('fCosto').value) || 0;
+            let ganancia = parseFloat(document.getElementById('fGanancia').value) || 0;
+            let precio = parseFloat(document.getElementById('fVenta').value) || 0;
+            let stock = parseInt(document.getElementById('fStock').value) || 0;
+            let depto = document.getElementById('fDepto').value.trim().toUpperCase();
+            let estado = document.getElementById('fEstado').value;
+
+            if(!codigo || !nombre) {
+                alert("El código y el nombre del producto son obligatorios.");
+                return;
+            }
 
             const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
             const fechaActual = new Date();
             const mesAnioDinamico = meses[fechaActual.getMonth()] + " " + fechaActual.getFullYear();
+            let tasaBcv = datosJsonGlobal.tasaBcv || 36;
 
-            let nuevo = {
-                "codigo": codigo,
-                "producto": nombre,
-                "unidad": "PIEZA",
-                "categoria": "GENERAL",
-                "pasillo": "0",
-                "estante": "0",
-                "cantidad": stock,
-                "cantreserva": 5,
-                "reservamax": 100,
-                "preciocompra": costo * (datosJsonGlobal.tasaBcv || 36),
-                "precioventa": precio * (datosJsonGlobal.tasaBcv || 36),
-                "siiva": 1,
-                "cheiva1": 1,
-                "cheiva2": 0,
-                "porcen": 30,
-                "dola": precio,
-                "poriva": datosJsonGlobal.porcentajeIva || 16,
-                "montoiva": 0,
-                "precioiva": precio,
-                "precosdol": costo,
-                "preciodol": precio,
-                "identi": "PRODUCTOS",
-                "usu": "ADMINISTRADOR",
-                "item3": 1,
-                "item": "P1",
-                "item8": costo * (datosJsonGlobal.tasaBcv || 36),
-                "item11": costo * (datosJsonGlobal.tasaBcv || 36),
-                "item19": costo * (datosJsonGlobal.tasaBcv || 36),
-                "item13": costo,
-                "item16": costo,
-                "item20": costo,
-                "item18": "DIVISA",
-                "item21": "NO",
-                "item23": "ALMACEN",
-                "item24": precio,
-                "item26": 30,
-                "item27": "NACIONAL",
-                "item31": "ACTIVO",
-                "item32": "",
-                "item34": precio * (datosJsonGlobal.tasaBcv || 36),
-                "item36": mesAnioDinamico,
-                "item39": precio,
-                "item40": precio,
-                "item44": 0,
-                "item48": datosJsonGlobal.tasaBcv || 36
-            };
+            if (index === -1) {
+                // NUEVO PRODUCTO
+                let nuevo = {
+                    "codigo": codigo,
+                    "producto": nombre,
+                    "unidad": "PIEZA",
+                    "categoria": depto,
+                    "pasillo": "0",
+                    "estante": "0",
+                    "cantidad": stock,
+                    "cantreserva": 5,
+                    "reservamax": 100,
+                    "preciocompra": costo * tasaBcv,
+                    "precioventa": precio * tasaBcv,
+                    "siiva": 1,
+                    "cheiva1": 1,
+                    "cheiva2": 0,
+                    "porcen": ganancia,
+                    "dola": precio,
+                    "poriva": datosJsonGlobal.porcentajeIva || 16,
+                    "montoiva": 0,
+                    "precioiva": precio,
+                    "precosdol": costo,
+                    "preciodol": precio,
+                    "identi": "PRODUCTOS",
+                    "usu": "ADMINISTRADOR",
+                    "item3": 1,
+                    "item": "P1",
+                    "item8": costo * tasaBcv,
+                    "item11": costo * tasaBcv,
+                    "item19": costo * tasaBcv,
+                    "item13": costo,
+                    "item16": costo,
+                    "item20": costo,
+                    "item18": "DIVISA",
+                    "item21": "NO",
+                    "item23": "ALMACEN",
+                    "item24": precio,
+                    "item26": ganancia,
+                    "item27": depto,
+                    "item31": estado,
+                    "item32": "",
+                    "item34": precio * tasaBcv,
+                    "item36": mesAnioDinamico,
+                    "item39": precio,
+                    "item40": precio,
+                    "item44": 0,
+                    "item48": tasaBcv
+                };
+                datosJsonGlobal.productos.push(nuevo);
+            } else {
+                // EDITAR PRODUCTO EXISTENTE
+                let p = datosJsonGlobal.productos[index];
+                p.codigo = codigo;
+                p.producto = nombre;
+                p.categoria = depto;
+                p.cantidad = stock;
+                p.precosdol = costo;
+                p.dola = precio;
+                p.preciodol = precio;
+                p.porcen = ganancia;
+                p.item13 = costo;
+                p.item24 = precio;
+                p.item26 = ganancia;
+                p.item27 = depto;
+                p.item31 = estado;
+                p.preciocompra = costo * tasaBcv;
+                p.precioventa = precio * tasaBcv;
+                p.item34 = precio * tasaBcv;
+            }
 
-            datosJsonGlobal.productos.push(nuevo);
+            cerrarModalFormulario();
             renderizarTabla();
-            alert("¡Producto agregado a la lista local! Haz clic en 'Guardar y Sincronizar Cambios' para actualizar la nube.");
+        }
+
+        function eliminarProducto(index) {
+            let p = datosJsonGlobal.productos[index];
+            if(confirm(`¿Estás seguro de eliminar "${p.producto}"?`)) {
+                datosJsonGlobal.productos.splice(index, 1);
+                renderizarTabla();
+            }
         }
 
         function abrirModalClave() {
@@ -245,9 +397,7 @@
             
             datosJsonGlobal.ultimaActualizacion = fechaHoraStr;
 
-            const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
-            
-            alert("¡Estructura lista! Aquí conectamos con la API de GitHub mediante PUT usando el token para consolidar el guardado.");
+            alert("¡Estructura lista! Aquí conectamos con la API de GitHub mediante PUT para guardar de forma definitiva.");
         }
     </script>
 </body>
