@@ -3,57 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GX-Touch Admin | Local</title>
+    <title>GX-Touch Cloud | Administración Local</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; background: #f1f5f9; }</style>
+    <style>body { font-family: 'Inter', sans-serif; background: #f8fafc; }</style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto">
         <!-- ENCABEZADO -->
-        <div class="bg-[#2e1065] text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-900/50">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold">GX-Touch Panel Local</h1>
-                <p id="lblEmpresa" class="text-violet-200 text-sm mt-1">Cargando datos...</p>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight">GX-Touch Cloud</h1>
+                    <span class="bg-indigo-500/30 text-indigo-200 text-xs px-2.5 py-1 rounded-full font-mono border border-indigo-400/30">Panel Seguro</span>
+                </div>
+                <p id="lblEmpresa" class="text-slate-300 text-sm mt-1">Cargando sistema...</p>
             </div>
-            <button onclick="logout()" class="hidden id-auth bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wide">Cerrar Sesión</button>
+            <button onclick="logout()" class="hidden id-auth bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2">
+                <span>Cerrar Sesión</span>
+            </button>
         </div>
 
         <!-- PASO 1: LOGIN CON CLAVE ADMIN -->
-        <div id="panelLogin" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-6 text-center max-w-md mx-auto">
-            <h2 class="text-xl font-bold text-slate-700 mb-2">Acceso Administrativo</h2>
-            <p class="text-slate-500 text-sm mb-4">Ingresa la clave de administración.</p>
-            <input type="password" id="txtClaveIngresada" placeholder="Clave Admin" class="w-full px-4 py-3 border border-slate-300 rounded-xl mb-4 text-center text-lg focus:outline-none focus:border-violet-600" onkeydown="if(event.key === 'Enter') verificarClave()">
-            <button onclick="verificarClave()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition">Entrar al Panel</button>
+        <div id="panelLogin" class="bg-white p-8 rounded-2xl shadow-lg border border-slate-200/80 mt-8 text-center max-w-md mx-auto">
+            <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner border border-indigo-100">
+                🔒
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mb-1">Acceso Administrativo</h2>
+            <p class="text-slate-500 text-sm mb-6">Introduce tu clave de seguridad para continuar.</p>
+            <input type="password" id="txtClaveIngresada" placeholder="••••••••" class="w-full px-4 py-3 border border-slate-300 rounded-xl mb-4 text-center text-xl tracking-widest focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 shadow-sm" onkeydown="if(event.key === 'Enter') verificarClave()">
+            <button onclick="verificarClave()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-md shadow-indigo-600/20">Ingresar al Sistema</button>
         </div>
 
         <!-- PASO 2: PANEL DE PRODUCTOS -->
         <div id="panelAdmin" class="hidden mt-6 space-y-6">
             
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
-                <button onclick="abrirModalFormulario()" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow flex items-center gap-2">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
+                <button onclick="abrirModalFormulario()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-indigo-600/20 transition flex items-center gap-2">
                     <span>+ Nuevo Producto</span>
                 </button>
-                <button onclick="abrirModalClave()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-lg font-semibold text-sm">Cambiar Clave Admin</button>
+                <button onclick="abrirModalClave()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-semibold text-sm transition border border-slate-200">🔒 Cambiar Clave Admin</button>
             </div>
 
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Inventario Local</h3>
-                    <span id="contadorProductos" class="text-xs bg-violet-100 text-violet-700 font-bold px-2.5 py-1 rounded-full">0 productos</span>
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <h3 class="font-bold text-slate-700">Inventario Sincronizado</h3>
+                    <span id="contadorProductos" class="text-xs bg-indigo-50 text-indigo-700 font-bold px-3 py-1 rounded-full border border-indigo-100">0 productos</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-3">Código</th>
-                                <th class="p-3">Producto</th>
-                                <th class="p-3 text-right">Costo ($)</th>
-                                <th class="p-3 text-right">Venta ($)</th>
-                                <th class="p-3 text-center">Stock</th>
-                                <th class="p-3 text-center">Ganancia (%)</th>
-                                <th class="p-3 text-center">Acciones</th>
+                                <th class="p-3.5">Código</th>
+                                <th class="p-3.5">Producto</th>
+                                <th class="p-3.5 text-right">Costo ($)</th>
+                                <th class="p-3.5 text-right">Venta ($)</th>
+                                <th class="p-3.5 text-center">Stock</th>
+                                <th class="p-3.5 text-center">Ganancia (%)</th>
+                                <th class="p-3.5 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaProductosBody" class="text-sm text-slate-700 divide-y divide-slate-100">
@@ -63,10 +71,10 @@
                 </div>
             </div>
 
-            <!-- BOTÓN DE GUARDAR LOCAL (DESCARGA JSON) -->
-            <div class="text-center pb-12">
-                <button onclick="guardarJsonLocal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg text-base transition transform hover:scale-105">
-                    💾 Guardar Cambios (Actualizar Archivo Local)
+            <!-- BOTÓN DE GUARDAR LOCAL -->
+            <div class="text-center pb-12 pt-4">
+                <button onclick="guardarJsonLocal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-emerald-600/20 text-base transition transform hover:scale-102 flex items-center gap-3 mx-auto">
+                    <span>💾 Guardar y Sincronizar Cambios</span>
                 </button>
             </div>
         </div>
@@ -81,43 +89,54 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Código</label>
-                    <input type="text" id="fCodigo" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none font-mono text-sm" placeholder="Ej. P002">
+                    <input type="text" id="fCodigo" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none font-mono text-sm shadow-sm" placeholder="Ej. P002">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Stock</label>
-                    <input type="number" id="fStock" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="10">
+                    <input type="number" id="fStock" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none text-sm shadow-sm" value="10">
                 </div>
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre del Producto</label>
-                <input type="text" id="fNombre" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" placeholder="Ej. Cable USB">
+                <input type="text" id="fNombre" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none text-sm shadow-sm" placeholder="Ej. Cable USB">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Departamento</label>
+                    <input type="text" id="fDepto" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none text-sm shadow-sm" value="GENERAL">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Estado</label>
+                    <input type="text" id="fEstado" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none text-sm shadow-sm" value="ACTIVO">
+                </div>
             </div>
 
             <div class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Costo ($)</label>
-                    <input type="number" step="0.01" id="fCosto" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="1.00">
+                    <input type="number" step="0.01" id="fCosto" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none text-sm shadow-sm" value="1.00">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Factor</label>
-                    <input type="number" step="0.01" id="fGanancia" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm font-bold text-amber-700 bg-amber-50" value="0.70">
+                    <input type="number" step="0.01" id="fGanancia" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none text-sm font-bold text-amber-700 bg-amber-50 shadow-sm" value="0.70">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Venta ($)</label>
-                    <input type="number" step="0.01" id="fVenta" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm font-bold text-violet-700 bg-violet-50" value="1.43">
+                    <input type="number" step="0.01" id="fVenta" class="w-full px-3 py-2 border rounded-xl focus:border-indigo-600 focus:outline-none text-sm font-bold text-indigo-700 bg-indigo-50 shadow-sm" value="1.43">
                 </div>
             </div>
 
             <!-- ETIQUETA DINÁMICA DE PORCENTAJE EN MODAL -->
-            <div class="bg-violet-50 border border-violet-100 p-2.5 rounded-xl text-center">
+            <div class="bg-indigo-50/70 border border-indigo-100 p-2.5 rounded-xl text-center">
                 <span class="text-xs text-slate-500">Equivalente real: </span>
-                <span id="lblPorcentajeReal" class="text-xs font-bold text-violet-700">30% de margen</span>
+                <span id="lblPorcentajeReal" class="text-xs font-bold text-indigo-700">30% de margen</span>
             </div>
 
             <div class="flex justify-end gap-3 pt-4 border-t">
-                <button onclick="cerrarModalFormulario()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm">Cancelar</button>
-                <button onclick="guardarProductoModal()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow">Guardar Producto</button>
+                <button onclick="cerrarModalFormulario()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">Cancelar</button>
+                <button onclick="guardarProductoModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm shadow-md transition">Guardar Producto</button>
             </div>
         </div>
     </div>
@@ -143,7 +162,8 @@
                 if (!response.ok) throw new Error("No se pudo leer el archivo local.");
                 
                 datosJsonGlobal = await response.json();
-                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa} | Archivo: ${nombreArchivoLocal}`;
+                let rifMostrar = datosJsonGlobal.rifEmpresa || "J-31234567-0";
+                document.getElementById('lblEmpresa').innerText = `RIF: ${rifMostrar} (Actualizar Productos en la Web)`;
 
             } catch (error) {
                 console.warn(error);
@@ -157,21 +177,62 @@
                         {
                             "codigo": "P001",
                             "producto": "PRODUCTO DE PRUEBA",
-                            "dola": 1.43,
-                            "precosdol": 1.00,
+                            "unidad": "PIEZA",
+                            "categoria": "GENERAL",
+                            "pasillo": "0",
+                            "estante": "0",
+                            "cantidad": 100,
+                            "cantreserva": 5,
+                            "reservamax": 100,
+                            "preciocompra": 36.50,
+                            "precioventa": 52.145,
+                            "siiva": 1,
+                            "cheiva1": 1,
+                            "cheiva2": 0,
                             "porcen": 0.70,
-                            "cantidad": 100
+                            "dola": 1.43,
+                            "poriva": 16,
+                            "montoiva": 0,
+                            "precioiva": 1.43,
+                            "precosdol": 1.00,
+                            "preciodol": 1.43,
+                            "identi": "PRODUCTOS",
+                            "usu": "ADMINISTRADOR",
+                            "item3": 1,
+                            "item": "P1",
+                            "item8": 36.50,
+                            "item11": 36.50,
+                            "item19": 36.50,
+                            "item13": 1.00,
+                            "item16": 1.00,
+                            "item20": 1.00,
+                            "item18": "DIVISA",
+                            "item21": "NO",
+                            "item23": "ALMACEN",
+                            "item24": 1.43,
+                            "item26": 0.70,
+                            "item27": "GENERAL",
+                            "item31": "ACTIVO",
+                            "item32": "",
+                            "item34": 52.145,
+                            "item36": "AGOSTO 2026",
+                            "item39": 1.43,
+                            "item40": 1.43,
+                            "item44": 0,
+                            "item48": 36.50,
+                            "estadoSincronizacion": "EDITADO"
                         }
                     ]
                 };
-                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa} (Modo Emergencia)`;
+                let rifMostrar = datosJsonGlobal.rifEmpresa || "J-31234567-0";
+                document.getElementById('lblEmpresa').innerText = `RIF: ${rifMostrar} (Actualizar Productos en la Web)`;
             }
         }
 
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
             if(!datosJsonGlobal) {
-                alert("Cargando datos, espera un momento...");
+                alert("Cargando el sistema, por favor espere un momento...");
                 return;
             }
             
@@ -181,7 +242,7 @@
                 document.querySelectorAll('.id-auth').forEach(el => el.classList.remove('hidden'));
                 renderizarTabla();
             } else {
-                alert("Clave de administración incorrecta.");
+                alert("La clave de administración es incorrecta. Verifique e intente de nuevo.");
             }
         }
 
@@ -189,7 +250,6 @@
             location.reload();
         }
 
-        // FUNCIÓN PARA CONVERTIR EL FACTOR EN PORCENTAJE LEGIBLE
         function obtenerPorcentajeLegible(factor) {
             let f = Number(factor);
             if (f > 0 && f < 1) {
@@ -216,16 +276,16 @@
                 let textoPorcentaje = obtenerPorcentajeLegible(factor);
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-mono text-xs text-slate-500">${p.codigo}</td>
-                        <td class="p-3 font-medium">${p.producto}</td>
-                        <td class="p-3 text-right font-mono">$${costo.toFixed(2)}</td>
-                        <td class="p-3 text-right font-mono font-bold text-violet-900">$${venta.toFixed(2)}</td>
-                        <td class="p-3 text-center font-semibold">${stock}</td>
-                        <td class="p-3 text-center font-mono font-bold text-emerald-700">${textoPorcentaje}</td>
-                        <td class="p-3 text-center space-x-1">
-                            <button onclick="abrirModalEditar(${index})" class="bg-slate-100 hover:bg-violet-100 text-violet-700 px-2.5 py-1 rounded-lg text-xs font-bold">Editar</button>
-                            <button onclick="eliminarProducto(${index})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold">Eliminar</button>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-3.5 font-mono text-xs text-slate-500">${p.codigo}</td>
+                        <td class="p-3.5 font-medium text-slate-800">${p.producto}</td>
+                        <td class="p-3.5 text-right font-mono text-slate-600">$${costo.toFixed(2)}</td>
+                        <td class="p-3.5 text-right font-mono font-bold text-indigo-900">$${venta.toFixed(2)}</td>
+                        <td class="p-3.5 text-center font-semibold text-slate-700">${stock}</td>
+                        <td class="p-3.5 text-center font-mono font-bold text-emerald-600">${textoPorcentaje}</td>
+                        <td class="p-3.5 text-center space-x-1">
+                            <button onclick="abrirModalEditar(${index})" class="bg-slate-100 hover:bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-xs font-bold transition">Editar</button>
+                            <button onclick="eliminarProducto(${index})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1 rounded-lg text-xs font-bold transition">Eliminar</button>
                         </td>
                     </tr>
                 `;
@@ -258,6 +318,8 @@
             document.getElementById('editIndex').value = "-1";
             document.getElementById('fCodigo').value = "";
             document.getElementById('fNombre').value = "";
+            document.getElementById('fDepto').value = "GENERAL";
+            document.getElementById('fEstado').value = "ACTIVO";
             document.getElementById('fCosto').value = "1.00";
             document.getElementById('fGanancia').value = "0.70";
             document.getElementById('fVenta').value = "1.43";
@@ -272,6 +334,8 @@
             document.getElementById('editIndex').value = index;
             document.getElementById('fCodigo').value = p.codigo || "";
             document.getElementById('fNombre').value = p.producto || "";
+            document.getElementById('fDepto').value = p.categoria || p.item27 || "GENERAL";
+            document.getElementById('fEstado').value = p.item31 || "ACTIVO";
             document.getElementById('fCosto').value = Number(p.precosdol || p.item13 || 1).toFixed(2);
             document.getElementById('fGanancia').value = p.porcen || p.item26 || 0.70;
             document.getElementById('fVenta').value = Number(p.dola || p.preciodol || 1.43).toFixed(2);
@@ -288,34 +352,92 @@
             let index = parseInt(document.getElementById('editIndex').value);
             let codigo = document.getElementById('fCodigo').value.trim();
             let nombre = document.getElementById('fNombre').value.trim();
+            let depto = document.getElementById('fDepto').value.trim().toUpperCase();
+            let estado = document.getElementById('fEstado').value.trim().toUpperCase();
             let costo = parseFloat(document.getElementById('fCosto').value) || 0;
             let factor = parseFloat(document.getElementById('fGanancia').value) || 0.70;
-            let venta = parseFloat(document.getElementById('fVenta').value) || 0;
+            let precio = parseFloat(document.getElementById('fVenta').value) || 0;
             let stock = parseInt(document.getElementById('fStock').value) || 0;
 
             if(!codigo || !nombre) {
-                alert("El código y el nombre son obligatorios.");
+                alert("Por favor complete los campos obligatorios: Código y Nombre del producto.");
                 return;
             }
+
+            const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+            const fechaActual = new Date();
+            const mesAnioDinamico = meses[fechaActual.getMonth()] + " " + fechaActual.getFullYear();
+            let tasaBcv = Number(datosJsonGlobal.tasaBcv || 36.50);
 
             if (index === -1) {
                 let nuevo = {
                     "codigo": codigo,
                     "producto": nombre,
-                    "dola": venta,
-                    "precosdol": costo,
+                    "unidad": "PIEZA",
+                    "categoria": depto,
+                    "pasillo": "0",
+                    "estante": "0",
+                    "cantidad": stock,
+                    "cantreserva": 5,
+                    "reservamax": 100,
+                    "preciocompra": costo * tasaBcv,
+                    "precioventa": precio * tasaBcv,
+                    "siiva": 1,
+                    "cheiva1": 1,
+                    "cheiva2": 0,
                     "porcen": factor,
-                    "cantidad": stock
+                    "dola": precio,
+                    "poriva": Number(datosJsonGlobal.porcentajeIva || 16),
+                    "montoiva": 0,
+                    "precioiva": precio,
+                    "precosdol": costo,
+                    "preciodol": precio,
+                    "identi": "PRODUCTOS",
+                    "usu": "ADMINISTRADOR",
+                    "item3": 1,
+                    "item": "P1",
+                    "item8": costo * tasaBcv,
+                    "item11": costo * tasaBcv,
+                    "item19": costo * tasaBcv,
+                    "item13": costo,
+                    "item16": costo,
+                    "item20": costo,
+                    "item18": "DIVISA",
+                    "item21": "NO",
+                    "item23": "ALMACEN",
+                    "item24": precio,
+                    "item26": factor,
+                    "item27": depto,
+                    "item31": estado,
+                    "item32": "",
+                    "item34": precio * tasaBcv,
+                    "item36": mesAnioDinamico,
+                    "item39": precio,
+                    "item40": precio,
+                    "item44": 0,
+                    "item48": tasaBcv,
+                    "estadoSincronizacion": "NUEVO"
                 };
                 datosJsonGlobal.productos.push(nuevo);
             } else {
                 let p = datosJsonGlobal.productos[index];
                 p.codigo = codigo;
                 p.producto = nombre;
-                p.precosdol = costo;
-                p.dola = venta;
-                p.porcen = factor;
+                p.categoria = depto;
                 p.cantidad = stock;
+                p.precosdol = costo;
+                p.dola = precio;
+                p.preciodol = precio;
+                p.porcen = factor;
+                p.item13 = costo;
+                p.item24 = precio;
+                p.item26 = factor;
+                p.item27 = depto;
+                p.item31 = estado;
+                p.preciocompra = costo * tasaBcv;
+                p.precioventa = precio * tasaBcv;
+                p.item34 = precio * tasaBcv;
+                p.estadoSincronizacion = "EDITADO";
             }
 
             cerrarModalFormulario();
@@ -324,17 +446,17 @@
 
         function eliminarProducto(index) {
             let p = datosJsonGlobal.productos[index];
-            if(confirm(`¿Estás seguro de eliminar "${p.producto}"?`)) {
+            if(confirm(`¿Está seguro de eliminar el producto "${p.producto}" del inventario?`)) {
                 datosJsonGlobal.productos.splice(index, 1);
                 renderizarTabla();
             }
         }
 
         function abrirModalClave() {
-            let nuevaClave = prompt("Ingresa la nueva clave de administración:");
+            let nuevaClave = prompt("Ingrese la nueva clave de administración:");
             if(nuevaClave) {
                 datosJsonGlobal.claveAdmin = nuevaClave;
-                alert("¡Clave actualizada en memoria! Haz clic en 'Guardar Cambios' para descargar el archivo actualizado.");
+                alert("¡Clave actualizada con éxito! Haga clic en 'Guardar y Sincronizar Cambios' para aplicar los cambios.");
             }
         }
 
@@ -355,7 +477,7 @@
             downloadAnchor.click();
             downloadAnchor.remove();
 
-            alert(`¡Archivo ${nombreArchivoLocal} generado y descargado con éxito!\nColócalo en tu carpeta de trabajo en C:.`);
+            alert(`¡Sincronización completada con éxito!\nEl archivo "${nombreArchivoLocal}" ha sido actualizado correctamente.`);
         }
     </script>
 </body>
