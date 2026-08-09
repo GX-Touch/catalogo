@@ -190,12 +190,14 @@
                 return;
             }
             if(ingresada === datosJsonGlobal.claveAdmin) {
-                tokenGitHub = prompt("Ingresa tu Token Personal de GitHub (Personal Access Token) para permitir sincronizar los cambios:") || "";
+                let tokenIngresado = prompt("Ingresa tu Token Personal de GitHub (Personal Access Token) para permitir sincronizar los cambios:");
                 
-                if(!tokenGitHub.trim()) {
+                if(!tokenIngresado || !tokenIngresado.trim()) {
                     alert("Se requiere el Token de GitHub para continuar.");
                     return;
                 }
+
+                tokenGitHub = tokenIngresado.trim();
 
                 document.getElementById('panelLogin').classList.add('hidden');
                 document.getElementById('panelAdmin').classList.remove('hidden');
@@ -428,9 +430,10 @@
         }
 
         async function guardarCambiosCloud() {
-            if(!tokenGitHub) {
-                tokenGitHub = prompt("Por favor ingresa tu Token de GitHub para autorizar el guardado:");
-                if(!tokenGitHub) return;
+            if(!tokenGitHub || !tokenGitHub.trim()) {
+                let tokenIngresado = prompt("Por favor ingresa tu Token de GitHub para autorizar el guardado:");
+                if(!tokenIngresado || !tokenIngresado.trim()) return;
+                tokenGitHub = tokenIngresado.trim();
             }
 
             if(!confirm("¿Deseas guardar todos los cambios y actualizar el archivo JSON en GitHub?")) return;
@@ -462,7 +465,7 @@
                     headers: { "Authorization": `token ${tokenGitHub}` }
                 });
                 
-                if(!getRes.ok) throw new Error("No se pudo obtener el identificador (SHA) del archivo en GitHub. Revisa tu Token.");
+                if(!getRes.ok) throw new Error("No se pudo obtener el identificador (SHA) del archivo en GitHub. Revisa que tu Token sea correcto y tenga permisos de repo.");
                 const fileData = await getRes.json();
                 const shaActual = fileData.sha;
 
