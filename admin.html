@@ -460,7 +460,9 @@
             }
         }
 
-            function guardarJsonLocal() {
+let ultimoUrlDescarga = null;
+
+        function guardarJsonLocal() {
             const ahora = new Date();
             datosJsonGlobal.ultimaActualizacion = ahora.getFullYear() + '-' + 
                 String(ahora.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -469,23 +471,25 @@
                 String(ahora.getMinutes()).padStart(2, '0') + ':' + 
                 String(ahora.getSeconds()).padStart(2, '0');
 
-            // Crear un Blob limpio en lugar de dataUri largo
+            // Si ya existía una descarga previa, liberamos su memoria completamente
+            if (ultimoUrlDescarga) {
+                URL.revokeObjectURL(ultimoUrlDescarga);
+            }
+
             const dataStr = JSON.stringify(datosJsonGlobal, null, 2);
             const blob = new Blob([dataStr], { type: "application/json;charset=utf-8" });
             
             const downloadAnchor = document.createElement('a');
-            const url = URL.createObjectURL(blob);
+            ultimoUrlDescarga = URL.createObjectURL(blob);
             
-            downloadAnchor.setAttribute("href", url);
-            downloadAnchor.setAttribute("download", nombreArchivoLocal);
+            downloadAnchor.href = ultimoUrlDescarga;
+            downloadAnchor.download = nombreArchivoLocal;
             
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             
-            // Limpieza inmediata para liberar memoria y evitar sufijos numéricos
             setTimeout(() => {
                 document.body.removeChild(downloadAnchor);
-                URL.revokeObjectURL(url);
             }, 100);
 
             alert(`¡Sincronización completada con éxito!\nEl archivo "${nombreArchivoLocal}" ha sido actualizado correctamente.`);
