@@ -42,7 +42,7 @@
             <!-- TABLA DE PRODUCTOS -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Inventario Detallado</h3>
+                    <h3 class="font-bold text-slate-700">Inventario Detallado en la Nube</h3>
                     <span id="contadorProductos" class="text-xs bg-violet-100 text-violet-700 font-bold px-2.5 py-1 rounded-full">0 productos</span>
                 </div>
                 <div class="overflow-x-auto">
@@ -67,10 +67,10 @@
                 </div>
             </div>
 
-            <!-- BOTÓN DE GENERAR Y DESCARGAR JSON PARA C:/ShopLite/ -->
+            <!-- BOTÓN DE GUARDAR Y SINCRONIZAR -->
             <div class="text-center pb-12">
-                <button onclick="descargarJsonLocal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg text-base transition transform hover:scale-105">
-                    💾 Generar y Descargar JSON (Guardar en C:\ShopLite)
+                <button onclick="guardarCambiosCloud()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg text-base transition transform hover:scale-105">
+                    🚀 Guardar y Sincronizar Cambios en GitHub
                 </button>
             </div>
         </div>
@@ -116,7 +116,7 @@
             
             <!-- ETIQUETA DINÁMICA DE TRADUCCIÓN A PORCENTAJE -->
             <div class="bg-violet-50 border border-violet-100 p-2.5 rounded-xl text-center">
-                <span class="text-xs text-slate-500">Equivalente real: </span>
+                <span class="text-xs text-slate-500">Equivalente real para el cajero/dueño: </span>
                 <span id="lblPorcentajeReal" class="text-xs font-bold text-violet-700">30% de margen</span>
             </div>
 
@@ -141,52 +141,49 @@
         </div>
     </div>
 
-    <!-- SCRIPT PRINCIPAL DE LÓGICA WEB -->
+    <!-- SCRIPT DE GESTIÓN Y SINCRONIZACIÓN AUTOMÁTICA -->
     <script>
+        const REPO_OWNER = "gx-touch";
+        const REPO_NAME = "catalogo";
+        
+        // =========================================================================
+        // EQUIVALENTE A GetAuthKey() EN VB6: Token integrado fijo y seguro en el script
+        // =========================================================================
+        const GITHUB_TOKEN = "AQUÍ_PEGAS_TU_TOKEN_PERSONAL_DE_GITHUB"; 
+
         let datosJsonGlobal = null;
         let rifActual = "";
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            rifActual = urlParams.get('rif') || 'productos';
-            cargarJsonDesdeGitHub();
+            rifActual = urlParams.get('rif');
+            if(!rifActual) {
+                alert("No se encontró el RIF de la empresa en la URL.");
+                return;
+            }
+            cargarJsonGitHub();
         }
 
-        async function cargarJsonDesdeGitHub() {
+        async function cargarJsonGitHub() {
             try {
-                // Configura tu usuario y repositorio aquí:
-                const usuario = "GX-Touch";
-                const repositorio = "catalogo";
-                
-                // Lee la versión en vivo que GX subió a GitHub (Raw view)
-                const url = `https://raw.githubusercontent.com/${usuario}/${repositorio}/main/${rifActual}.json?t=` + new Date().getTime(); 
-                
+                const url = `./productos/${rifActual}.json?t=` + new Date().getTime(); 
                 const response = await fetch(url);
-                if(!response.ok) throw new Error("No se pudo obtener el archivo desde GitHub. Revisa el RIF en la URL.");
+                if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
                 
                 datosJsonGlobal = await response.json();
-                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa || rifActual}`;
+                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
             } catch (error) {
-                alert("Aviso: " + error.message + "\nSe creará una estructura temporal de respaldo.");
-                datosJsonGlobal = {
-                    "rifEmpresa": rifActual.toUpperCase(),
-                    "claveAdmin": "1234",
-                    "tasaBcv": 36.00,
-                    "porcentajeIva": 16,
-                    "ultimaActualizacion": "2026-01-01 00:00:00",
-                    "productos": []
-                };
-                document.getElementById('lblEmpresa').innerText = `RIF: ${rifActual}`;
+                alert("Error cargando datos: " + error.message);
             }
         }
 
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
             if(!datosJsonGlobal) {
-                alert("Cargando datos desde GitHub, espera un momento...");
+                alert("Aún no se han cargado los datos. Espera un segundo.");
                 return;
             }
-            if(ingresada === (datosJsonGlobal.claveAdmin || "1234")) {
+            if(ingresada === datosJsonGlobal.claveAdmin) {
                 document.getElementById('panelLogin').classList.add('hidden');
                 document.getElementById('panelAdmin').classList.remove('hidden');
                 document.querySelectorAll('.id-auth').forEach(el => el.classList.remove('hidden'));
@@ -200,6 +197,7 @@
             location.reload();
         }
 
+        // FUNCIÓN AUXILIAR PARA OBTENER EL PORCENTAJE LEGIBLE DESDE EL FACTOR
         function obtenerPorcentajeLegible(factor, costo, venta) {
             let f = Number(factor);
             if (f > 0 && f < 1) {
@@ -261,14 +259,14 @@
             if (factor > 0 && factor < 1) {
                 venta = costo / factor;
                 let porcentajeMargen = Math.round((1 - factor) * 100);
-                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeMargen}% de ganancia (División)`;
+                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeMargen}% de ganancia (Venta por división)`;
             } else if (factor >= 1) {
                 venta = costo * factor;
                 let porcentajeIncremento = Math.round((factor - 1) * 100);
-                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeIncremento}% de incremento (Multiplicación)`;
+                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeIncremento}% de incremento (Venta por multiplicación)`;
             } else {
                 venta = costo;
-                document.getElementById('lblPorcentajeReal').innerText = `0%`;
+                document.getElementById('lblPorcentajeReal').innerText = `0% (Sin ganancia)`;
             }
             
             document.getElementById('fVenta').value = venta.toFixed(2);
@@ -415,17 +413,16 @@
             let nuevaClave = prompt("Ingresa la nueva clave de administración:");
             if(nuevaClave) {
                 datosJsonGlobal.claveAdmin = nuevaClave;
-                alert("¡Clave actualizada en memoria! Recuerda descargar el JSON para guardarla.");
+                alert("¡Clave actualizada! Haz clic en 'Guardar y Sincronizar Cambios' para aplicarla en la nube.");
             }
         }
 
         // =========================================================================
-        // FUNCIÓN DE DESCARGA LOCAL PARA C:/ShopLite/
+        // EQUIVALENTE EXACTO A LA RUTINA DE VB6: Obtiene SHA (GET) y actualiza (PUT)
         // =========================================================================
-        function descargarJsonLocal() {
-            if(!confirm("¿Deseas generar el archivo JSON actualizado? Recuerda guardarlo directamente en la carpeta C:\\ShopLite\\ de tu PC")) return;
+        async function guardarCambiosCloud() {
+            if(!confirm("¿Deseas guardar todos los cambios y actualizar el archivo JSON en GitHub?")) return;
 
-            // Generar fecha y hora exacta con el formato YYYY-MM-DD HH:MM:SS
             const ahora = new Date();
             const fechaHoraStr = ahora.getFullYear() + '-' + 
                 String(ahora.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -436,22 +433,56 @@
             
             datosJsonGlobal.ultimaActualizacion = fechaHoraStr;
 
-            // Convertir objeto a texto JSON
             const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
             
-            // Forzar descarga directa
-            const blob = new Blob([jsonText], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            a.href = url;
-            a.download = `${datosJsonGlobal.rifEmpresa || 'productos'}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const utf8Bytes = new TextEncoder().encode(jsonText);
+            let binaryString = "";
+            for (let i = 0; i < utf8Bytes.length; i++) {
+                binaryString += String.fromCharCode(utf8Bytes[i]);
+            }
+            const base64Content = btoa(binaryString);
 
-            alert(`¡JSON generado con éxito!\n\nFecha/Hora de marca: ${fechaHoraStr}\n\nGuarda este archivo en tu carpeta local: C:\\ShopLite\\`);
+            const pathArchivo = `productos/${rifActual}.json`;
+            const urlApi = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pathArchivo}`;
+
+            try {
+                // 1. GET para obtener el SHA actual (Exacto a tu código de VB6)
+                const getRes = await fetch(urlApi, {
+                    headers: { 
+                        "Authorization": `token ${GITHUB_TOKEN}`,
+                        "User-Agent": "GX-System"
+                    }
+                });
+                
+                if(!getRes.ok) throw new Error("No se pudo obtener el archivo desde GitHub. Revisa la conexión o el token.");
+                const fileData = await getRes.json();
+                const shaActual = fileData.sha;
+
+                // 2. PUT para subir los cambios (Exacto a tu código de VB6)
+                const putRes = await fetch(urlApi, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${GITHUB_TOKEN}`,
+                        "Content-Type": "application/json",
+                        "User-Agent": "GX-System"
+                    },
+                    body: JSON.stringify({
+                        message: "Sync GX-Touch",
+                        content: base64Content,
+                        sha: shaActual
+                    })
+                });
+
+                if(putRes.ok || putRes.status === 201) {
+                    alert("¡Catálogo GX-Web sincronizado exitosamente!");
+                } else {
+                    const errJson = await putRes.json();
+                    throw new Error(errJson.message || "Error al actualizar el archivo en GitHub.");
+                }
+
+            } catch (error) {
+                alert("Error de conexión con GX-Web: " + error.message);
+            }
         }
     </script>
 </body>
