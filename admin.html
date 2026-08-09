@@ -42,7 +42,7 @@
             <!-- TABLA DE PRODUCTOS -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Inventario Detallado</h3>
+                    <h3 class="font-bold text-slate-700">Inventario Detallado en la Nube</h3>
                     <span id="contadorProductos" class="text-xs bg-violet-100 text-violet-700 font-bold px-2.5 py-1 rounded-full">0 productos</span>
                 </div>
                 <div class="overflow-x-auto">
@@ -67,10 +67,10 @@
                 </div>
             </div>
 
-            <!-- BOTÓN DE GENERAR Y DESCARGAR JSON PARA C:/ShopLite/ -->
+            <!-- BOTÓN DE GUARDAR Y SINCRONIZAR -->
             <div class="text-center pb-12">
-                <button onclick="descargarJsonLocal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg text-base transition transform hover:scale-105">
-                    💾 Generar y Descargar JSON (Guardar en C:\ShopLite)
+                <button onclick="guardarCambiosCloud()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg text-base transition transform hover:scale-105">
+                    🚀 Guardar y Sincronizar Cambios en GitHub
                 </button>
             </div>
         </div>
@@ -116,7 +116,7 @@
             
             <!-- ETIQUETA DINÁMICA DE TRADUCCIÓN A PORCENTAJE -->
             <div class="bg-violet-50 border border-violet-100 p-2.5 rounded-xl text-center">
-                <span class="text-xs text-slate-500">Equivalente real: </span>
+                <span class="text-xs text-slate-500">Equivalente real para el cajero/dueño: </span>
                 <span id="lblPorcentajeReal" class="text-xs font-bold text-violet-700">30% de margen</span>
             </div>
 
@@ -141,49 +141,81 @@
         </div>
     </div>
 
-    <!-- SCRIPT PRINCIPAL DE LÓGICA WEB -->
+    <!-- SCRIPT DE GESTIÓN Y SINCRONIZACIÓN CON API DE GITHUB -->
     <script>
+        const REPO_OWNER = "gx-touch";
+        const REPO_NAME = "catalogo";
+        
+        // Coloca aquí tu token personal de GitHub:
+        const GITHUB_TOKEN = "AQUÍ_PEGAS_TU_TOKEN_PERSONAL_DE_GITHUB"; 
+
         let datosJsonGlobal = null;
         let rifActual = "";
+        let shaArchivo = "";
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            rifActual = urlParams.get('rif') || 'productos';
-            cargarJsonDesdeGitHub();
+            rifActual = urlParams.get('rif');
+            if(!rifActual) {
+                alert("No se encontró el RIF de la empresa en la URL. Ejemplo: ?rif=J123456789");
+                document.getElementById('lblEmpresa').innerText = "Error: Falta parámetro RIF en la URL";
+                return;
+            }
+            cargarJsonGitHubApi();
         }
 
-        async function cargarJsonDesdeGitHub() {
+        // Carga el JSON mediante la API de GitHub usando el Token (Evita errores 404 de archivos nuevos o rutas relativas)
+        async function cargarJsonGitHubApi() {
+            const pathArchivo = `productos/${rifActual}.json`;
+            const urlApi = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pathArchivo}`;
+
             try {
-                // Configura tu usuario y repositorio aquí:
-                const usuario = "GX-Touch";
-                const repositorio = "catalogo";
+                const response = await fetch(urlApi, {
+                    headers: {
+                        "Authorization": `token ${GITHUB_TOKEN}`,
+                        "Accept": "application/vnd.github.v3+json",
+                        "User-Agent": "GX-System"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("El archivo no existe en el repositorio o el Token es inválido.");
+                }
+
+                const data = await response.json();
+                shaArchivo = data.sha; // Guardamos el SHA indispensable para futuros PUT
+
+                // Decodificar el contenido Base64 que devuelve la API de GitHub
+                const binString = atob(data.content.replace(/\s/g, ''));
+                const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0));
+                const decodedJsonString = new TextDecoder().decode(bytes);
                 
-                // Lee la versión en vivo que GX subió a GitHub (Raw view)
-                const url = `https://raw.githubusercontent.com/${usuario}/${repositorio}/main/${rifActual}.json?t=` + new Date().getTime(); 
-                
-                const response = await fetch(url);
-                if(!response.ok) throw new Error("No se pudo obtener el archivo desde GitHub. Revisa el RIF en la URL.");
-                
-                datosJsonGlobal = await response.json();
+                datosJsonGlobal = JSON.parse(decodedJsonString);
                 document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa || rifActual}`;
+
             } catch (error) {
-                alert("Aviso: " + error.message + "\nSe creará una estructura temporal de respaldo.");
-                datosJsonGlobal = {
-                    "rifEmpresa": rifActual.toUpperCase(),
-                    "claveAdmin": "1234",
-                    "tasaBcv": 36.00,
-                    "porcentajeIva": 16,
-                    "ultimaActualizacion": "2026-01-01 00:00:00",
-                    "productos": []
-                };
-                document.getElementById('lblEmpresa').innerText = `RIF: ${rifActual}`;
+                console.warn(error);
+                if(confirm("No se encontró el archivo en la nube para este RIF o hubo un fallo de lectura.\n¿Deseas inicializar una estructura básica nueva para este comercio?")) {
+                    datosJsonGlobal = {
+                        "rifEmpresa": rifActual.toUpperCase(),
+                        "claveAdmin": "1234",
+                        "tasaBcv": 36.00,
+                        "porcentajeIva": 16,
+                        "ultimaActualizacion": "2026-01-01 00:00:00",
+                        "productos": []
+                    };
+                    shaArchivo = ""; // Al ser nuevo, no lleva SHA en el primer PUT
+                    document.getElementById('lblEmpresa').innerText = `RIF: ${rifActual} (Nuevo / Sin sincronizar)`;
+                } else {
+                    document.getElementById('lblEmpresa').innerText = "Error de carga.";
+                }
             }
         }
 
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
             if(!datosJsonGlobal) {
-                alert("Cargando datos desde GitHub, espera un momento...");
+                alert("Aún se están cargando los datos de la nube. Espera un segundo.");
                 return;
             }
             if(ingresada === (datosJsonGlobal.claveAdmin || "1234")) {
@@ -415,17 +447,16 @@
             let nuevaClave = prompt("Ingresa la nueva clave de administración:");
             if(nuevaClave) {
                 datosJsonGlobal.claveAdmin = nuevaClave;
-                alert("¡Clave actualizada en memoria! Recuerda descargar el JSON para guardarla.");
+                alert("¡Clave actualizada! Haz clic en 'Guardar y Sincronizar Cambios' para aplicarla en la nube.");
             }
         }
 
         // =========================================================================
-        // FUNCIÓN DE DESCARGA LOCAL PARA C:/ShopLite/
+        // SINCRONIZACIÓN AUTOMÁTICA VÍA API DE GITHUB (PUT)
         // =========================================================================
-        function descargarJsonLocal() {
-            if(!confirm("¿Deseas generar el archivo JSON actualizado? Recuerda guardarlo directamente en la carpeta C:\\ShopLite\\ de tu PC")) return;
+        async function guardarCambiosCloud() {
+            if(!confirm("¿Deseas guardar todos los cambios y actualizar el archivo JSON en GitHub?")) return;
 
-            // Generar fecha y hora exacta con el formato YYYY-MM-DD HH:MM:SS
             const ahora = new Date();
             const fechaHoraStr = ahora.getFullYear() + '-' + 
                 String(ahora.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -436,22 +467,52 @@
             
             datosJsonGlobal.ultimaActualizacion = fechaHoraStr;
 
-            // Convertir objeto a texto JSON
             const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
             
-            // Forzar descarga directa
-            const blob = new Blob([jsonText], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            a.href = url;
-            a.download = `${datosJsonGlobal.rifEmpresa || 'productos'}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // Codificación UTF-8 robusta para Base64
+            const utf8Bytes = new TextEncoder().encode(jsonText);
+            let binaryString = "";
+            for (let i = 0; i < utf8Bytes.length; i++) {
+                binaryString += String.fromCharCode(utf8Bytes[i]);
+            }
+            const base64Content = btoa(binaryString);
 
-            alert(`¡JSON generado con éxito!\n\nFecha/Hora de marca: ${fechaHoraStr}\n\nGuarda este archivo en tu carpeta local: C:\\ShopLite\\`);
+            const pathArchivo = `productos/${rifActual}.json`;
+            const urlApi = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pathArchivo}`;
+
+            try {
+                let cuerpoPeticion = {
+                    message: `Sync GX-Touch para RIF: ${rifActual}`,
+                    content: base64Content
+                };
+
+                // Si ya tenemos el SHA (porque el archivo ya existía), lo incluimos
+                if (shaArchivo) {
+                    cuerpoPeticion.sha = shaArchivo;
+                }
+
+                const putRes = await fetch(urlApi, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${GITHUB_TOKEN}`,
+                        "Content-Type": "application/json",
+                        "User-Agent": "GX-System"
+                    },
+                    body: JSON.stringify(cuerpoPeticion)
+                });
+
+                if(putRes.ok || putRes.status === 201) {
+                    const resJson = await putRes.json();
+                    shaArchivo = resJson.content.sha; // Actualizamos el SHA con el nuevo commit
+                    alert("¡Catálogo GX-Web sincronizado y guardado exitosamente en GitHub!");
+                } else {
+                    const errJson = await putRes.json();
+                    throw new Error(errJson.message || "Error al actualizar el archivo en GitHub.");
+                }
+
+            } catch (error) {
+                alert("Error de conexión con GitHub API: " + error.message);
+            }
         }
     </script>
 </body>
