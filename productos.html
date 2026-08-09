@@ -71,13 +71,12 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE GESTIÓN (GitHub API + Lógica) -->
+    <!-- SCRIPT DE GESTIÓN OPTIMIZADO -->
     <script>
         const REPO_OWNER = "gx-touch";
         const REPO_NAME = "catalogo";
         
         let datosJsonGlobal = null;
-        let shaArchivo = "";
         let rifActual = "";
 
         window.onload = function() {
@@ -91,20 +90,20 @@
         }
 
         async function cargarJsonGitHub() {
-    try {
-        // Usamos una ruta relativa directa desde la raíz del sitio
-        const url = `./productos/${rifActual}.json`;
-        
-        const response = await fetch(url);
-        if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
-        
-        datosJsonGlobal = await response.json();
+            try {
+                // Ruta relativa directa al archivo JSON dentro de la carpeta productos
+                const url = `./productos/${rifActual}.json`;
+                
+                const response = await fetch(url);
+                if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
+                
+                datosJsonGlobal = await response.json();
 
-        document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
-    } catch (error) {
-        alert("Error cargando datos: " + error.message);
-    }
-}
+                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
+            } catch (error) {
+                alert("Error cargando datos: " + error.message);
+            }
+        }
 
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
@@ -168,7 +167,6 @@
             let precio = parseFloat(prompt("Precio de venta en dólares ($):", "1.50")) || 0;
             let stock = parseInt(prompt("Cantidad / Stock inicial:", "10")) || 0;
 
-            // Obtener mes y año actual dinámicamente (ej: "AGOSTO 2026")
             const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
             const fechaActual = new Date();
             const mesAnioDinamico = meses[fechaActual.getMonth()] + " " + fechaActual.getFullYear();
@@ -248,8 +246,7 @@
             datosJsonGlobal.ultimaActualizacion = fechaHoraStr;
 
             const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
-            const base64Content = btoa(unescape(encodeURIComponent(jsonText)));
-
+            
             alert("¡Estructura lista! Aquí conectamos con la API de GitHub mediante PUT usando el token para consolidar el guardado.");
         }
     </script>
