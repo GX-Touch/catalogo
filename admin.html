@@ -3,68 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GX-Touch Cloud Admin | Panel de Gestión</title>
+    <title>GX-Touch Admin | Local</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; background: #f8fafc; }</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; background: #f1f5f9; }</style>
 </head>
-<body class="p-4 md:p-8 text-slate-800">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-7xl mx-auto space-y-6">
-        <!-- ENCABEZADO ELEGANTE -->
-        <div class="bg-gradient-to-r from-violet-900 to-indigo-900 text-white p-6 md:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="space-y-1 text-center md:text-left">
-                <span class="bg-violet-700/60 text-violet-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Cloud Admin Panel</span>
-                <h1 class="text-2xl md:text-3xl font-bold tracking-tight">GX-Touch Inventario</h1>
-                <p id="lblEmpresa" class="text-violet-200 text-sm font-medium">Cargando datos de la empresa...</p>
+    <div class="max-w-7xl mx-auto">
+        <!-- ENCABEZADO -->
+        <div class="bg-[#2e1065] text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold">GX-Touch Panel Local</h1>
+                <p id="lblEmpresa" class="text-violet-200 text-sm mt-1">Cargando datos...</p>
             </div>
-            <button onclick="logout()" class="hidden id-auth bg-rose-500/90 hover:bg-rose-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg transition transform hover:scale-105">Cerrar Sesión</button>
+            <button onclick="logout()" class="hidden id-auth bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wide">Cerrar Sesión</button>
         </div>
 
         <!-- PASO 1: LOGIN CON CLAVE ADMIN -->
-        <div id="panelLogin" class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100 max-w-md mx-auto text-center space-y-4">
-            <div class="w-12 h-12 bg-violet-100 text-violet-600 rounded-2xl mx-auto flex items-center justify-center font-bold text-xl shadow-inner">🔒</div>
-            <div>
-                <h2 class="text-xl font-bold text-slate-800">Acceso Administrativo</h2>
-                <p class="text-slate-500 text-sm mt-1">Ingresa la clave de administración de tu sistema.</p>
-            </div>
-            <input type="password" id="txtClaveIngresada" placeholder="Clave Admin" class="w-full px-4 py-3.5 border border-slate-200 rounded-2xl text-center text-lg focus:outline-none focus:ring-2 focus:ring-violet-600 focus:border-transparent bg-slate-50 font-mono">
-            <button onclick="verificarClave()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/20 transition transform hover:scale-[1.02]">Entrar al Panel</button>
+        <div id="panelLogin" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-6 text-center max-w-md mx-auto">
+            <h2 class="text-xl font-bold text-slate-700 mb-2">Acceso Administrativo</h2>
+            <p class="text-slate-500 text-sm mb-4">Ingresa la clave de administración.</p>
+            <input type="password" id="txtClaveIngresada" placeholder="Clave Admin" class="w-full px-4 py-3 border border-slate-300 rounded-xl mb-4 text-center text-lg focus:outline-none focus:border-violet-600" onkeydown="if(event.key === 'Enter') verificarClave()">
+            <button onclick="verificarClave()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition">Entrar al Panel</button>
         </div>
 
         <!-- PASO 2: PANEL DE PRODUCTOS -->
-        <div id="panelAdmin" class="hidden space-y-6">
+        <div id="panelAdmin" class="hidden mt-6 space-y-6">
             
-            <!-- BARRA DE ACCESOS RÁPIDOS -->
-            <div class="bg-white p-4 md:p-6 rounded-3xl border border-slate-100 shadow-xl flex flex-wrap justify-between items-center gap-4">
-                <button onclick="abrirModalFormulario()" class="bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-violet-600/20 flex items-center gap-2 transition transform hover:scale-105">
-                    <span class="text-lg leading-none">+</span> Nuevo Producto
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
+                <button onclick="abrirModalFormulario()" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow flex items-center gap-2">
+                    <span>+ Nuevo Producto</span>
                 </button>
-                <button onclick="abrirModalClave()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-semibold text-sm transition">🔑 Cambiar Clave Admin</button>
+                <button onclick="abrirModalClave()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-lg font-semibold text-sm">Cambiar Clave Admin</button>
             </div>
 
-            <!-- TABLA DE PRODUCTOS -->
-            <div class="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <div>
-                        <h3 class="font-bold text-slate-800 text-lg">Inventario Detallado en la Nube</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Gestión en tiempo real sincronizada con GitHub</p>
-                    </div>
-                    <span id="contadorProductos" class="text-xs bg-violet-100 text-violet-700 font-bold px-3 py-1.5 rounded-xl shadow-sm">0 productos</span>
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700">Inventario Local</h3>
+                    <span id="contadorProductos" class="text-xs bg-violet-100 text-violet-700 font-bold px-2.5 py-1 rounded-full">0 productos</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead>
-                            <tr class="bg-slate-100/70 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
-                                <th class="p-4">Código</th>
-                                <th class="p-4">Producto</th>
-                                <th class="p-4 text-right">Costo ($)</th>
-                                <th class="p-4 text-right">Venta ($)</th>
-                                <th class="p-4 text-center">Stock</th>
-                                <th class="p-4 text-center">Ganancia (%)</th>
-                                <th class="p-4 text-center">Estado</th>
-                                <th class="p-4">Departamento</th>
-                                <th class="p-4 text-center">Acciones</th>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
+                                <th class="p-3">Código</th>
+                                <th class="p-3">Producto</th>
+                                <th class="p-3 text-right">Costo ($)</th>
+                                <th class="p-3 text-right">Venta ($)</th>
+                                <th class="p-3 text-center">Stock</th>
+                                <th class="p-3 text-center">Ganancia (%)</th>
+                                <th class="p-3 text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaProductosBody" class="text-sm text-slate-700 divide-y divide-slate-100">
@@ -74,131 +63,119 @@
                 </div>
             </div>
 
-            <!-- BOTÓN DE GUARDAR Y SINCRONIZAR -->
-            <div class="text-center pt-4 pb-12">
-                <button onclick="guardarCambiosCloud()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-10 py-4 rounded-2xl shadow-xl shadow-emerald-600/30 text-base transition transform hover:scale-105">
-                    🚀 Guardar y Sincronizar Cambios en GitHub
+            <!-- BOTÓN DE GUARDAR LOCAL (DESCARGA JSON) -->
+            <div class="text-center pb-12">
+                <button onclick="guardarJsonLocal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg text-base transition transform hover:scale-105">
+                    💾 Guardar Cambios (Actualizar Archivo Local)
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL / FORMULARIO FLOTANTE -->
-    <div id="modalProducto" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 md:p-8 space-y-5 border border-slate-100 transform transition-all">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 id="modalTitulo" class="text-xl font-bold text-slate-800">Nuevo Producto</h3>
-                <button onclick="cerrarModalFormulario()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
-            </div>
-            
+    <!-- MODAL / FORMULARIO -->
+    <div id="modalProducto" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-100">
+            <h3 id="modalTitulo" class="text-xl font-bold text-slate-800 border-b pb-2">Nuevo Producto</h3>
             <input type="hidden" id="editIndex" value="-1">
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Código</label>
-                    <input type="text" id="fCodigo" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 focus:outline-none font-mono text-sm bg-slate-50" placeholder="Ej. P001">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Código</label>
+                    <input type="text" id="fCodigo" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none font-mono text-sm" placeholder="Ej. P002">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Departamento</label>
-                    <input type="text" id="fDepto" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 focus:outline-none text-sm bg-slate-50" value="GENERAL">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Stock</label>
+                    <input type="number" id="fStock" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="10">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Nombre / Descripción del Producto</label>
-                <input type="text" id="fNombre" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 focus:outline-none text-sm bg-slate-50" placeholder="Ej. Cable USB Tipo C">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nombre del Producto</label>
+                <input type="text" id="fNombre" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" placeholder="Ej. Cable USB">
             </div>
 
             <div class="grid grid-cols-3 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Costo ($)</label>
-                    <input type="number" step="0.01" id="fCosto" oninput="calcularPrecioAuto()" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 focus:outline-none text-sm bg-slate-50" value="1.00">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Costo ($)</label>
+                    <input type="number" step="0.01" id="fCosto" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="1.00">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Factor / Divisor</label>
-                    <input type="number" step="0.01" id="fGanancia" oninput="calcularPrecioAuto()" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 focus:outline-none text-sm font-bold text-amber-700 bg-amber-50/50" value="0.70">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Factor</label>
+                    <input type="number" step="0.01" id="fGanancia" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm font-bold text-amber-700 bg-amber-50" value="0.70">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Precio Venta ($)</label>
-                    <input type="number" step="0.01" id="fVenta" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl font-bold text-violet-700 bg-violet-50/70 focus:outline-none text-sm" value="1.43">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Venta ($)</label>
+                    <input type="number" step="0.01" id="fVenta" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm font-bold text-violet-700 bg-violet-50" value="1.43">
                 </div>
             </div>
-            
-            <!-- ETIQUETA DINÁMICA DE TRADUCCIÓN A PORCENTAJE -->
-            <div class="bg-violet-50 border border-violet-100 p-3 rounded-2xl text-center shadow-sm">
-                <span class="text-xs text-slate-500">Equivalente real para el cajero/dueño: </span>
+
+            <!-- ETIQUETA DINÁMICA DE PORCENTAJE EN MODAL -->
+            <div class="bg-violet-50 border border-violet-100 p-2.5 rounded-xl text-center">
+                <span class="text-xs text-slate-500">Equivalente real: </span>
                 <span id="lblPorcentajeReal" class="text-xs font-bold text-violet-700">30% de margen</span>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Stock Inicial</label>
-                    <input type="number" id="fStock" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 focus:outline-none text-sm bg-slate-50" value="10">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Estado</label>
-                    <select id="fEstado" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:border-violet-600 focus:ring-2 focus:ring-violet-600/20 focus:outline-none text-sm bg-slate-50">
-                        <option value="ACTIVO">ACTIVO</option>
-                        <option value="INACTIVO">INACTIVO</option>
-                    </select>
-                </div>
-            </div>
-
             <div class="flex justify-end gap-3 pt-4 border-t">
-                <button onclick="cerrarModalFormulario()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">Cancelar</button>
-                <button onclick="guardarProductoModal()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition">Guardar Producto</button>
+                <button onclick="cerrarModalFormulario()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm">Cancelar</button>
+                <button onclick="guardarProductoModal()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow">Guardar Producto</button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT DE GESTIÓN Y GUARDADO REAL -->
     <script>
-        const REPO_OWNER = "gx-touch";
-        const REPO_NAME = "catalogo";
-        
         let datosJsonGlobal = null;
-        let rifActual = "";
-        let tokenGitHub = ""; 
+        let nombreArchivoLocal = "J312345670.json";
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            rifActual = urlParams.get('rif');
-            if(!rifActual) {
-                alert("No se encontró el RIF de la empresa en la URL.");
-                return;
+            let rifParam = urlParams.get('rif');
+            
+            if(rifParam) {
+                nombreArchivoLocal = rifParam.replace(/[-\s]/g, "").toUpperCase() + ".json";
             }
-            cargarJsonGitHub();
+            
+            cargarJsonLocal();
         }
 
-        async function cargarJsonGitHub() {
+        async function cargarJsonLocal() {
             try {
-                const url = `./productos/${rifActual}.json?t=` + new Date().getTime(); 
-                const response = await fetch(url);
-                if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
+                const response = await fetch(nombreArchivoLocal);
+                if (!response.ok) throw new Error("No se pudo leer el archivo local.");
                 
                 datosJsonGlobal = await response.json();
-                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
+                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa} | Archivo: ${nombreArchivoLocal}`;
+
             } catch (error) {
-                alert("Error cargando datos: " + error.message);
+                console.warn(error);
+                datosJsonGlobal = {
+                    "rifEmpresa": "J-31234567-0",
+                    "claveAdmin": "12345",
+                    "ultimaActualizacion": "2026-08-09 14:12:13",
+                    "tasaBcv": 36.50,
+                    "porcentajeIva": 16.00,
+                    "productos": [
+                        {
+                            "codigo": "P001",
+                            "producto": "PRODUCTO DE PRUEBA",
+                            "dola": 1.43,
+                            "precosdol": 1.00,
+                            "porcen": 0.70,
+                            "cantidad": 100
+                        }
+                    ]
+                };
+                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa} (Modo Emergencia)`;
             }
         }
 
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
             if(!datosJsonGlobal) {
-                alert("Aún no se han cargado los datos. Espera un segundo.");
+                alert("Cargando datos, espera un momento...");
                 return;
             }
-            if(ingresada === datosJsonGlobal.claveAdmin) {
-                let tokenIngresado = prompt("Ingresa tu Token Personal de GitHub (Personal Access Token) para permitir sincronizar los cambios:");
-                
-                if(!tokenIngresado || !tokenIngresado.trim()) {
-                    alert("Se requiere el Token de GitHub para continuar.");
-                    return;
-                }
-
-                tokenGitHub = tokenIngresado.trim();
-
+            
+            if(ingresada === (datosJsonGlobal.claveAdmin || "12345")) {
                 document.getElementById('panelLogin').classList.add('hidden');
                 document.getElementById('panelAdmin').classList.remove('hidden');
                 document.querySelectorAll('.id-auth').forEach(el => el.classList.remove('hidden'));
@@ -212,7 +189,7 @@
             location.reload();
         }
 
-        // FUNCIÓN AUXILIAR PARA OBTENER EL PORCENTAJE LEGIBLE DESDE EL FACTOR
+        // FUNCIÓN PARA CONVERTIR EL FACTOR EN PORCENTAJE LEGIBLE
         function obtenerPorcentajeLegible(factor) {
             let f = Number(factor);
             if (f > 0 && f < 1) {
@@ -232,31 +209,23 @@
 
             datosJsonGlobal.productos.forEach((p, index) => {
                 let costo = Number(p.precosdol || p.item13 || 0);
-                let venta = Number(p.dola || p.preciodol || p.item24 || 0);
+                let venta = Number(p.dola || p.preciodol || 0);
                 let stock = p.cantidad !== undefined ? p.cantidad : 0;
                 let factor = p.porcen || p.item26 || 0.70;
-                let estado = p.item31 || "ACTIVO";
-                let depto = p.categoria || p.item27 || "GENERAL";
 
                 let textoPorcentaje = obtenerPorcentajeLegible(factor);
 
-                let badgeEstado = estado === "ACTIVO" 
-                    ? `<span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-xl text-xs font-bold shadow-sm">Activo</span>`
-                    : `<span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-xl text-xs font-bold shadow-sm">Inactivo</span>`;
-
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-4 font-mono text-xs text-slate-500 font-semibold">${p.codigo}</td>
-                        <td class="p-4 font-semibold text-slate-800">${p.producto}</td>
-                        <td class="p-4 text-right font-mono text-slate-600">$${costo.toFixed(2)}</td>
-                        <td class="p-4 text-right font-mono font-bold text-violet-900">$${venta.toFixed(2)}</td>
-                        <td class="p-4 text-center font-semibold text-slate-700">${stock}</td>
-                        <td class="p-4 text-center font-mono font-bold text-emerald-700 text-sm">${textoPorcentaje}</td>
-                        <td class="p-4 text-center">${badgeEstado}</td>
-                        <td class="p-4 text-xs font-medium text-slate-600">${depto}</td>
-                        <td class="p-4 text-center space-x-2">
-                            <button onclick="abrirModalEditar(${index})" class="bg-slate-100 hover:bg-violet-100 text-violet-700 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm transition">Editar</button>
-                            <button onclick="eliminarProducto(${index})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm transition">Eliminar</button>
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-mono text-xs text-slate-500">${p.codigo}</td>
+                        <td class="p-3 font-medium">${p.producto}</td>
+                        <td class="p-3 text-right font-mono">$${costo.toFixed(2)}</td>
+                        <td class="p-3 text-right font-mono font-bold text-violet-900">$${venta.toFixed(2)}</td>
+                        <td class="p-3 text-center font-semibold">${stock}</td>
+                        <td class="p-3 text-center font-mono font-bold text-emerald-700">${textoPorcentaje}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="abrirModalEditar(${index})" class="bg-slate-100 hover:bg-violet-100 text-violet-700 px-2.5 py-1 rounded-lg text-xs font-bold">Editar</button>
+                            <button onclick="eliminarProducto(${index})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold">Eliminar</button>
                         </td>
                     </tr>
                 `;
@@ -271,14 +240,14 @@
             if (factor > 0 && factor < 1) {
                 venta = costo / factor;
                 let porcentajeMargen = Math.round((1 - factor) * 100);
-                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeMargen}% de ganancia (Factor división)`;
+                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeMargen}% de margen (Divisor)`;
             } else if (factor >= 1) {
                 venta = costo * factor;
                 let porcentajeIncremento = Math.round((factor - 1) * 100);
-                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeIncremento}% de incremento (Factor multiplicación)`;
+                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeIncremento}% de incremento (Multiplicador)`;
             } else {
                 venta = costo;
-                document.getElementById('lblPorcentajeReal').innerText = `0% (Sin ganancia)`;
+                document.getElementById('lblPorcentajeReal').innerText = `0%`;
             }
             
             document.getElementById('fVenta').value = venta.toFixed(2);
@@ -293,8 +262,6 @@
             document.getElementById('fGanancia').value = "0.70";
             document.getElementById('fVenta').value = "1.43";
             document.getElementById('fStock').value = "10";
-            document.getElementById('fDepto').value = "GENERAL";
-            document.getElementById('fEstado').value = "ACTIVO";
             calcularPrecioAuto();
             document.getElementById('modalProducto').classList.remove('hidden');
         }
@@ -309,8 +276,6 @@
             document.getElementById('fGanancia').value = p.porcen || p.item26 || 0.70;
             document.getElementById('fVenta').value = Number(p.dola || p.preciodol || 1.43).toFixed(2);
             document.getElementById('fStock').value = p.cantidad !== undefined ? p.cantidad : 10;
-            document.getElementById('fDepto').value = p.categoria || p.item27 || "GENERAL";
-            document.getElementById('fEstado').value = p.item31 || "ACTIVO";
             calcularPrecioAuto();
             document.getElementById('modalProducto').classList.remove('hidden');
         }
@@ -325,88 +290,32 @@
             let nombre = document.getElementById('fNombre').value.trim();
             let costo = parseFloat(document.getElementById('fCosto').value) || 0;
             let factor = parseFloat(document.getElementById('fGanancia').value) || 0.70;
-            let precio = parseFloat(document.getElementById('fVenta').value) || 0;
+            let venta = parseFloat(document.getElementById('fVenta').value) || 0;
             let stock = parseInt(document.getElementById('fStock').value) || 0;
-            let depto = document.getElementById('fDepto').value.trim().toUpperCase();
-            let estado = document.getElementById('fEstado').value;
 
             if(!codigo || !nombre) {
-                alert("El código y el nombre del producto son obligatorios.");
+                alert("El código y el nombre son obligatorios.");
                 return;
             }
-
-            const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-            const fechaActual = new Date();
-            const mesAnioDinamico = meses[fechaActual.getMonth()] + " " + fechaActual.getFullYear();
-            let tasaBcv = datosJsonGlobal.tasaBcv || 36;
 
             if (index === -1) {
                 let nuevo = {
                     "codigo": codigo,
                     "producto": nombre,
-                    "unidad": "PIEZA",
-                    "categoria": depto,
-                    "pasillo": "0",
-                    "estante": "0",
-                    "cantidad": stock,
-                    "cantreserva": 5,
-                    "reservamax": 100,
-                    "preciocompra": costo * tasaBcv,
-                    "precioventa": precio * tasaBcv,
-                    "siiva": 1,
-                    "cheiva1": 1,
-                    "cheiva2": 0,
-                    "porcen": factor,
-                    "dola": precio,
-                    "poriva": datosJsonGlobal.porcentajeIva || 16,
-                    "montoiva": 0,
-                    "precioiva": precio,
+                    "dola": venta,
                     "precosdol": costo,
-                    "preciodol": precio,
-                    "identi": "PRODUCTOS",
-                    "usu": "ADMINISTRADOR",
-                    "item3": 1,
-                    "item": "P1",
-                    "item8": costo * tasaBcv,
-                    "item11": costo * tasaBcv,
-                    "item19": costo * tasaBcv,
-                    "item13": costo,
-                    "item16": costo,
-                    "item20": costo,
-                    "item18": "DIVISA",
-                    "item21": "NO",
-                    "item23": "ALMACEN",
-                    "item24": precio,
-                    "item26": factor,
-                    "item27": depto,
-                    "item31": estado,
-                    "item32": "",
-                    "item34": precio * tasaBcv,
-                    "item36": mesAnioDinamico,
-                    "item39": precio,
-                    "item40": precio,
-                    "item44": 0,
-                    "item48": tasaBcv
+                    "porcen": factor,
+                    "cantidad": stock
                 };
                 datosJsonGlobal.productos.push(nuevo);
             } else {
                 let p = datosJsonGlobal.productos[index];
                 p.codigo = codigo;
                 p.producto = nombre;
-                p.categoria = depto;
-                p.cantidad = stock;
                 p.precosdol = costo;
-                p.dola = precio;
-                p.preciodol = precio;
+                p.dola = venta;
                 p.porcen = factor;
-                p.item13 = costo;
-                p.item24 = precio;
-                p.item26 = factor;
-                p.item27 = depto;
-                p.item31 = estado;
-                p.preciocompra = costo * tasaBcv;
-                p.precioventa = precio * tasaBcv;
-                p.item34 = precio * tasaBcv;
+                p.cantidad = stock;
             }
 
             cerrarModalFormulario();
@@ -425,73 +334,28 @@
             let nuevaClave = prompt("Ingresa la nueva clave de administración:");
             if(nuevaClave) {
                 datosJsonGlobal.claveAdmin = nuevaClave;
-                alert("¡Clave actualizada! Haz clic en 'Guardar y Sincronizar Cambios' para aplicarla en la nube.");
+                alert("¡Clave actualizada en memoria! Haz clic en 'Guardar Cambios' para descargar el archivo actualizado.");
             }
         }
 
-        async function guardarCambiosCloud() {
-            if(!tokenGitHub || !tokenGitHub.trim()) {
-                let tokenIngresado = prompt("Por favor ingresa tu Token de GitHub para autorizar el guardado:");
-                if(!tokenIngresado || !tokenIngresado.trim()) return;
-                tokenGitHub = tokenIngresado.trim();
-            }
-
-            if(!confirm("¿Deseas guardar todos los cambios y actualizar el archivo JSON en GitHub?")) return;
-
+        function guardarJsonLocal() {
             const ahora = new Date();
-            const fechaHoraStr = ahora.getFullYear() + '-' + 
+            datosJsonGlobal.ultimaActualizacion = ahora.getFullYear() + '-' + 
                 String(ahora.getMonth() + 1).padStart(2, '0') + '-' + 
                 String(ahora.getDate()).padStart(2, '0') + ' ' + 
                 String(ahora.getHours()).padStart(2, '0') + ':' + 
                 String(ahora.getMinutes()).padStart(2, '0') + ':' + 
                 String(ahora.getSeconds()).padStart(2, '0');
-            
-            datosJsonGlobal.ultimaActualizacion = fechaHoraStr;
 
-            const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
-            
-            const utf8Bytes = new TextEncoder().encode(jsonText);
-            let binaryString = "";
-            for (let i = 0; i < utf8Bytes.length; i++) {
-                binaryString += String.fromCharCode(utf8Bytes[i]);
-            }
-            const base64Content = btoa(binaryString);
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosJsonGlobal, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", nombreArchivoLocal);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
 
-            const pathArchivo = `productos/${rifActual}.json`;
-            const urlApi = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pathArchivo}`;
-
-            try {
-                const getRes = await fetch(urlApi, {
-                    headers: { "Authorization": `token ${tokenGitHub}` }
-                });
-                
-                if(!getRes.ok) throw new Error("No se pudo obtener el identificador (SHA) del archivo en GitHub. Revisa que tu Token sea correcto y tenga permisos de repo.");
-                const fileData = await getRes.json();
-                const shaActual = fileData.sha;
-
-                const putRes = await fetch(urlApi, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `token ${tokenGitHub}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        message: `Actualización de inventario para ${rifActual} desde Panel Cloud`,
-                        content: base64Content,
-                        sha: shaActual
-                    })
-                });
-
-                if(putRes.ok) {
-                    alert("¡Éxito! Cambios guardados y sincronizados correctamente en GitHub 🚀");
-                } else {
-                    const errJson = await putRes.json();
-                    throw new Error(errJson.message || "Error al actualizar el archivo en GitHub.");
-                }
-
-            } catch (error) {
-                alert("Error al sincronizar: " + error.message);
-            }
+            alert(`¡Archivo ${nombreArchivoLocal} generado y descargado con éxito!\nColócalo en tu carpeta de trabajo en C:.`);
         }
     </script>
 </body>
