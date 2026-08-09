@@ -6,13 +6,12 @@
     <title>GX-Cloud Admin | Panel de Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; }
-    </style>
+    <style>body { font-family: 'Inter', sans-serif; background: #f1f5f9; }</style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto">
+        <!-- ENCABEZADO -->
         <div class="bg-[#2e1065] text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold">GX-Touch Cloud Admin</h1>
@@ -21,6 +20,7 @@
             <button onclick="logout()" class="hidden id-auth bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wide">Cerrar Sesión</button>
         </div>
 
+        <!-- PASO 1: LOGIN CON CLAVE ADMIN -->
         <div id="panelLogin" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-6 text-center max-w-md mx-auto">
             <h2 class="text-xl font-bold text-slate-700 mb-2">Acceso Administrativo</h2>
             <p class="text-slate-500 text-sm mb-4">Ingresa la clave de administración de tu sistema.</p>
@@ -28,7 +28,10 @@
             <button onclick="verificarClave()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl transition">Entrar al Panel</button>
         </div>
 
+        <!-- PASO 2: PANEL DE PRODUCTOS -->
         <div id="panelAdmin" class="hidden mt-6 space-y-6">
+            
+            <!-- BARRA DE ACCESOS RÁPIDOS -->
             <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
                 <button onclick="abrirModalFormulario()" class="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow flex items-center gap-2">
                     <span>+ Nuevo Producto</span>
@@ -36,6 +39,7 @@
                 <button onclick="abrirModalClave()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-lg font-semibold text-sm">Cambiar Clave Admin</button>
             </div>
 
+            <!-- TABLA DE PRODUCTOS -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="p-4 border-b border-slate-100 flex justify-between items-center">
                     <h3 class="font-bold text-slate-700">Inventario Detallado en la Nube</h3>
@@ -57,11 +61,13 @@
                             </tr>
                         </thead>
                         <tbody id="tablaProductosBody" class="text-sm text-slate-700 divide-y divide-slate-100">
+                            <!-- Inyectado por JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
+            <!-- BOTÓN DE GUARDAR Y SINCRONIZAR -->
             <div class="text-center pb-12">
                 <button onclick="guardarCambiosCloud()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg text-base transition transform hover:scale-105">
                     🚀 Guardar y Sincronizar Cambios en GitHub
@@ -70,9 +76,11 @@
         </div>
     </div>
 
+    <!-- MODAL / FORMULARIO FLOTANTE -->
     <div id="modalProducto" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-100">
             <h3 id="modalTitulo" class="text-xl font-bold text-slate-800 border-b pb-2">Nuevo Producto</h3>
+            
             <input type="hidden" id="editIndex" value="-1">
 
             <div class="grid grid-cols-2 gap-4">
@@ -128,13 +136,14 @@
         </div>
     </div>
 
+    <!-- SCRIPT DE GESTIÓN Y GUARDADO REAL -->
     <script>
         const REPO_OWNER = "gx-touch";
         const REPO_NAME = "catalogo";
         
         let datosJsonGlobal = null;
         let rifActual = "";
-        let tokenGitHub = "";
+        let tokenGitHub = ""; // Para el guardado seguro
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -144,16 +153,16 @@
                 return;
             }
             cargarJsonGitHub();
-        };
+        }
 
         async function cargarJsonGitHub() {
             try {
-                const url = "./productos/" + rifActual + ".json";
+                const url = `./productos/${rifActual}.json`;
                 const response = await fetch(url);
                 if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
                 
                 datosJsonGlobal = await response.json();
-                document.getElementById('lblEmpresa').innerText = "RIF: " + datosJsonGlobal.rifEmpresa;
+                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
             } catch (error) {
                 alert("Error cargando datos: " + error.message);
             }
@@ -166,11 +175,12 @@
                 return;
             }
             if(ingresada === datosJsonGlobal.claveAdmin) {
+                // Pedimos el Token de GitHub una sola vez al entrar para permitir guardar cambios directamente
                 tokenGitHub = prompt("Ingresa tu Token Personal de GitHub (Personal Access Token) para permitir sincronizar los cambios:") || "";
                 
                 document.getElementById('panelLogin').classList.add('hidden');
                 document.getElementById('panelAdmin').classList.remove('hidden');
-                document.querySelectorAll('.id-auth').forEach(function(el) { el.classList.remove('hidden'); });
+                document.querySelectorAll('.id-auth').forEach(el => el.classList.remove('hidden'));
                 renderizarTabla();
             } else {
                 alert("Clave de administración incorrecta.");
@@ -184,9 +194,9 @@
         function renderizarTabla() {
             const tbody = document.getElementById('tablaProductosBody');
             tbody.innerHTML = "";
-            document.getElementById('contadorProductos').innerText = datosJsonGlobal.productos.length + " productos";
+            document.getElementById('contadorProductos').innerText = `${datosJsonGlobal.productos.length} productos`;
 
-            datosJsonGlobal.productos.forEach(function(p, index) {
+            datosJsonGlobal.productos.forEach((p, index) => {
                 let costo = Number(p.precosdol || p.item13 || 0);
                 let venta = Number(p.dola || p.preciodol || p.item24 || 0);
                 let stock = p.cantidad !== undefined ? p.cantidad : 0;
@@ -195,28 +205,31 @@
                 let depto = p.categoria || p.item27 || "GENERAL";
 
                 let badgeEstado = estado === "ACTIVO" 
-                    ? '<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs font-bold">Activo</span>'
-                    : '<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full text-xs font-bold">Inactivo</span>';
+                    ? `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs font-bold">Activo</span>`
+                    : `<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full text-xs font-bold">Inactivo</span>`;
 
-                tbody.innerHTML += '\
-                    <tr class="hover:bg-slate-50">\
-                        <td class="p-3 font-mono text-xs text-slate-500">' + p.codigo + '</td>\
-                        <td class="p-3 font-medium">' + p.producto + '</td>\
-                        <td class="p-3 text-right font-mono">$' + costo.toFixed(2) + '</td>\
-                        <td class="p-3 text-right font-mono font-bold text-violet-900">$' + venta.toFixed(2) + '</td>\
-                        <td class="p-3 text-center font-semibold">' + stock + '</td>\
-                        <td class="p-3 text-center font-mono text-xs text-slate-600">' + factor + '</td>\
-                        <td class="p-3 text-center">' + badgeEstado + '</td>\
-                        <td class="p-3 text-xs text-slate-600">' + depto + '</td>\
-                        <td class="p-3 text-center space-x-1">\
-                            <button onclick="abrirModalEditar(' + index + ')" class="bg-slate-100 hover:bg-violet-100 text-violet-700 px-2.5 py-1 rounded-lg text-xs font-bold">Editar</button>\
-                            <button onclick="eliminarProducto(' + index + ')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold">Eliminar</button>\
-                        </td>\
-                    </tr>\
-                ';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-mono text-xs text-slate-500">${p.codigo}</td>
+                        <td class="p-3 font-medium">${p.producto}</td>
+                        <td class="p-3 text-right font-mono">$${costo.toFixed(2)}</td>
+                        <td class="p-3 text-right font-mono font-bold text-violet-900">$${venta.toFixed(2)}</td>
+                        <td class="p-3 text-center font-semibold">${stock}</td>
+                        <td class="p-3 text-center font-mono text-xs text-slate-600">${factor}</td>
+                        <td class="p-3 text-center">${badgeEstado}</td>
+                        <td class="p-3 text-xs text-slate-600">${depto}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="abrirModalEditar(${index})" class="bg-slate-100 hover:bg-violet-100 text-violet-700 px-2.5 py-1 rounded-lg text-xs font-bold">Editar</button>
+                            <button onclick="eliminarProducto(${index})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-2.5 py-1 rounded-lg text-xs font-bold">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
             });
         }
 
+        // LÓGICA EXACTA DE CÁLCULO:
+        // Si el factor es < 1 (ej: 0.70) -> Venta = Costo / Factor (Ej: 1$ / 0.70 = 1.43$)
+        // Si el factor es >= 1 (ej: 1.30) -> Venta = Costo * Factor (Ej: 1$ * 1.30 = 1.30$)
         function calcularPrecioAuto() {
             let costo = parseFloat(document.getElementById('fCosto').value) || 0;
             let factor = parseFloat(document.getElementById('fGanancia').value) || 0.70;
@@ -238,8 +251,8 @@
             document.getElementById('fCodigo').value = "";
             document.getElementById('fNombre').value = "";
             document.getElementById('fCosto').value = "1.00";
-            document.getElementById('fGanancia').value = "0.70";
-            document.getElementById('fVenta').value = "1.43";
+            document.getElementById('fGanancia').value = "0.70"; // Inicia en 0.70 como pediste
+            document.getElementById('fVenta').value = "1.43";    // 1 / 0.70 = 1.43
             document.getElementById('fStock').value = "10";
             document.getElementById('fDepto').value = "GENERAL";
             document.getElementById('fEstado').value = "ACTIVO";
@@ -361,7 +374,7 @@
 
         function eliminarProducto(index) {
             let p = datosJsonGlobal.productos[index];
-            if(confirm('¿Estás seguro de eliminar "' + p.producto + '"?')) {
+            if(confirm(`¿Estás seguro de eliminar "${p.producto}"?`)) {
                 datosJsonGlobal.productos.splice(index, 1);
                 renderizarTabla();
             }
@@ -375,6 +388,7 @@
             }
         }
 
+        // GUARDADO Y ACTUALIZACIÓN REAL EN GITHUB MEDIANTE API PUT
         async function guardarCambiosCloud() {
             if(!tokenGitHub) {
                 tokenGitHub = prompt("Por favor ingresa tu Token de GitHub para autorizar el guardado:");
@@ -395,26 +409,28 @@
 
             const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
             const base64Content = btoa(unescape(encodeURIComponent(jsonText)));
-            const pathArchivo = "productos/" + rifActual + ".json";
-            const urlApi = "https://api.github.com/repos/" + REPO_OWNER + "/" + REPO_NAME + "/contents/" + pathArchivo;
+            const pathArchivo = `productos/${rifActual}.json`;
+            const urlApi = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pathArchivo}`;
 
             try {
+                // 1. Obtenemos el SHA actual del archivo en GitHub (requisito obligatorio de la API)
                 const getRes = await fetch(urlApi, {
-                    headers: { "Authorization": "token " + tokenGitHub }
+                    headers: { "Authorization": `token ${tokenGitHub}` }
                 });
                 
                 if(!getRes.ok) throw new Error("No se pudo obtener el identificador (SHA) del archivo en GitHub. Revisa tu Token.");
                 const fileData = await getRes.json();
                 const shaActual = fileData.sha;
 
+                // 2. Enviamos los nuevos datos mediante PUT
                 const putRes = await fetch(urlApi, {
                     method: "PUT",
                     headers: {
-                        "Authorization": "token " + tokenGitHub,
+                        "Authorization": `token ${tokenGitHub}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        message: "Actualización de inventario para " + rifActual + " desde Panel Cloud",
+                        message: `Actualización de inventario para ${rifActual} desde Panel Cloud`,
                         content: base64Content,
                         sha: shaActual
                     })
