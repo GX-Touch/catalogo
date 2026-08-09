@@ -54,7 +54,7 @@
                                 <th class="p-3 text-right">Costo ($)</th>
                                 <th class="p-3 text-right">Venta ($)</th>
                                 <th class="p-3 text-center">Stock</th>
-                                <th class="p-3 text-center">Factor / Modo</th>
+                                <th class="p-3 text-center">Ganancia (%)</th>
                                 <th class="p-3 text-center">Estado</th>
                                 <th class="p-3">Departamento</th>
                                 <th class="p-3 text-center">Acciones</th>
@@ -105,14 +105,19 @@
                     <input type="number" step="0.01" id="fCosto" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm" value="1.00">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Factor de Cálculo</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Factor / Divisor</label>
                     <input type="number" step="0.01" id="fGanancia" oninput="calcularPrecioAuto()" class="w-full px-3 py-2 border rounded-xl focus:border-violet-600 focus:outline-none text-sm font-bold text-amber-700" value="0.70">
-                    <span class="text-[9px] text-slate-500">Ej: 0.70 (Costo/0.7) o 1.30 (Costo*1.3)</span>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Precio Venta ($)</label>
                     <input type="number" step="0.01" id="fVenta" class="w-full px-3 py-2 border rounded-xl font-bold text-violet-700 bg-violet-50 focus:outline-none text-sm" value="1.43">
                 </div>
+            </div>
+            
+            <!-- ETIQUETA DINÁMICA DE TRADUCCIÓN A PORCENTAJE -->
+            <div class="bg-violet-50 border border-violet-100 p-2.5 rounded-xl text-center">
+                <span class="text-xs text-slate-500">Equivalente real para el cajero/dueño: </span>
+                <span id="lblPorcentajeReal" class="text-xs font-bold text-violet-700">30% de margen</span>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -143,7 +148,7 @@
         
         let datosJsonGlobal = null;
         let rifActual = "";
-        let tokenGitHub = ""; // Para el guardado seguro
+        let tokenGitHub = ""; 
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -157,7 +162,7 @@
 
         async function cargarJsonGitHub() {
             try {
-                const url = `./productos/${rifActual}.json`;
+                const url = `./productos/${rifActual}.json?t=` + new Date().getTime(); 
                 const response = await fetch(url);
                 if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
                 
@@ -175,9 +180,13 @@
                 return;
             }
             if(ingresada === datosJsonGlobal.claveAdmin) {
-                // Pedimos el Token de GitHub una sola vez al entrar para permitir guardar cambios directamente
                 tokenGitHub = prompt("Ingresa tu Token Personal de GitHub (Personal Access Token) para permitir sincronizar los cambios:") || "";
                 
+                if(!tokenGitHub.trim()) {
+                    alert("Se requiere el Token de GitHub para continuar.");
+                    return;
+                }
+
                 document.getElementById('panelLogin').classList.add('hidden');
                 document.getElementById('panelAdmin').classList.remove('hidden');
                 document.querySelectorAll('.id-auth').forEach(el => el.classList.remove('hidden'));
@@ -189,6 +198,23 @@
 
         function logout() {
             location.reload();
+        }
+
+        // FUNCIÓN AUXILIAR PARA OBTENER EL PORCENTAJE LEGIBLE DESDE EL FACTOR
+        function obtenerPorcentajeLegible(factor, costo, venta) {
+            let f = Number(factor);
+            if (f > 0 && f < 1) {
+                // Ej: 0.70 significa que el costo es el 70% de la venta, por ende hay un 30% de margen aprox
+                let porc = Math.round((1 - f) * 100);
+                return `${porc}% (Margen)`;
+            } else if (f >= 1) {
+                let porc = Math.round((f - 1) * 100);
+                return `${porc}% (Markup)`;
+            } else if (costo > 0 && venta > 0) {
+                let porc = Math.round(((venta - costo) / venta) * 100);
+                return `${porc}%`;
+            }
+            return "30%";
         }
 
         function renderizarTabla() {
@@ -204,6 +230,9 @@
                 let estado = p.item31 || "ACTIVO";
                 let depto = p.categoria || p.item27 || "GENERAL";
 
+                // Calculamos el texto amigable del porcentaje para la tabla
+                let textoPorcentaje = obtenerPorcentajeLegible(factor, costo, venta);
+
                 let badgeEstado = estado === "ACTIVO" 
                     ? `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-xs font-bold">Activo</span>`
                     : `<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full text-xs font-bold">Inactivo</span>`;
@@ -215,7 +244,7 @@
                         <td class="p-3 text-right font-mono">$${costo.toFixed(2)}</td>
                         <td class="p-3 text-right font-mono font-bold text-violet-900">$${venta.toFixed(2)}</td>
                         <td class="p-3 text-center font-semibold">${stock}</td>
-                        <td class="p-3 text-center font-mono text-xs text-slate-600">${factor}</td>
+                        <td class="p-3 text-center font-mono font-bold text-emerald-700 text-sm">${textoPorcentaje}</td>
                         <td class="p-3 text-center">${badgeEstado}</td>
                         <td class="p-3 text-xs text-slate-600">${depto}</td>
                         <td class="p-3 text-center space-x-1">
@@ -227,9 +256,6 @@
             });
         }
 
-        // LÓGICA EXACTA DE CÁLCULO:
-        // Si el factor es < 1 (ej: 0.70) -> Venta = Costo / Factor (Ej: 1$ / 0.70 = 1.43$)
-        // Si el factor es >= 1 (ej: 1.30) -> Venta = Costo * Factor (Ej: 1$ * 1.30 = 1.30$)
         function calcularPrecioAuto() {
             let costo = parseFloat(document.getElementById('fCosto').value) || 0;
             let factor = parseFloat(document.getElementById('fGanancia').value) || 0.70;
@@ -237,11 +263,17 @@
 
             if (factor > 0 && factor < 1) {
                 venta = costo / factor;
+                let porcentajeMargen = Math.round((1 - factor) * 100);
+                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeMargen}% de ganancia (Venta por división)`;
             } else if (factor >= 1) {
                 venta = costo * factor;
+                let porcentajeIncremento = Math.round((factor - 1) * 100);
+                document.getElementById('lblPorcentajeReal').innerText = `${porcentajeIncremento}% de incremento (Venta por multiplicación)`;
             } else {
                 venta = costo;
+                document.getElementById('lblPorcentajeReal').innerText = `0% (Sin ganancia)`;
             }
+            
             document.getElementById('fVenta').value = venta.toFixed(2);
         }
 
@@ -251,11 +283,12 @@
             document.getElementById('fCodigo').value = "";
             document.getElementById('fNombre').value = "";
             document.getElementById('fCosto').value = "1.00";
-            document.getElementById('fGanancia').value = "0.70"; // Inicia en 0.70 como pediste
-            document.getElementById('fVenta').value = "1.43";    // 1 / 0.70 = 1.43
+            document.getElementById('fGanancia').value = "0.70";
+            document.getElementById('fVenta').value = "1.43";
             document.getElementById('fStock').value = "10";
             document.getElementById('fDepto').value = "GENERAL";
             document.getElementById('fEstado').value = "ACTIVO";
+            calcularPrecioAuto(); // Actualiza la etiqueta del porcentaje
             document.getElementById('modalProducto').classList.remove('hidden');
         }
 
@@ -271,6 +304,7 @@
             document.getElementById('fStock').value = p.cantidad !== undefined ? p.cantidad : 10;
             document.getElementById('fDepto').value = p.categoria || p.item27 || "GENERAL";
             document.getElementById('fEstado').value = p.item31 || "ACTIVO";
+            calcularPrecioAuto(); // Actualiza la etiqueta del porcentaje
             document.getElementById('modalProducto').classList.remove('hidden');
         }
 
@@ -388,7 +422,6 @@
             }
         }
 
-        // GUARDADO Y ACTUALIZACIÓN REAL EN GITHUB MEDIANTE API PUT
         async function guardarCambiosCloud() {
             if(!tokenGitHub) {
                 tokenGitHub = prompt("Por favor ingresa tu Token de GitHub para autorizar el guardado:");
@@ -408,12 +441,18 @@
             datosJsonGlobal.ultimaActualizacion = fechaHoraStr;
 
             const jsonText = JSON.stringify(datosJsonGlobal, null, 2);
-            const base64Content = btoa(unescape(encodeURIComponent(jsonText)));
+            
+            const utf8Bytes = new TextEncoder().encode(jsonText);
+            let binaryString = "";
+            for (let i = 0; i < utf8Bytes.length; i++) {
+                binaryString += String.fromCharCode(utf8Bytes[i]);
+            }
+            const base64Content = btoa(binaryString);
+
             const pathArchivo = `productos/${rifActual}.json`;
             const urlApi = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pathArchivo}`;
 
             try {
-                // 1. Obtenemos el SHA actual del archivo en GitHub (requisito obligatorio de la API)
                 const getRes = await fetch(urlApi, {
                     headers: { "Authorization": `token ${tokenGitHub}` }
                 });
@@ -422,7 +461,6 @@
                 const fileData = await getRes.json();
                 const shaActual = fileData.sha;
 
-                // 2. Enviamos los nuevos datos mediante PUT
                 const putRes = await fetch(urlApi, {
                     method: "PUT",
                     headers: {
