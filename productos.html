@@ -91,22 +91,20 @@
         }
 
         async function cargarJsonGitHub() {
-            try {
-                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/productos/${rifActual}.json`;
-                const response = await fetch(url);
-                if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
-                
-                const data = await response.json();
-                shaArchivo = data.sha;
-                
-                const jsonString = decodeURIComponent(escape(atob(data.content)));
-                datosJsonGlobal = JSON.parse(jsonString);
+    try {
+        // Usamos una ruta relativa directa desde la raíz del sitio
+        const url = `./productos/${rifActual}.json`;
+        
+        const response = await fetch(url);
+        if(!response.ok) throw new Error("No se encontró el archivo de la empresa en la nube.");
+        
+        datosJsonGlobal = await response.json();
 
-                document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
-            } catch (error) {
-                alert("Error cargando datos: " + error.message);
-            }
-        }
+        document.getElementById('lblEmpresa').innerText = `RIF: ${datosJsonGlobal.rifEmpresa}`;
+    } catch (error) {
+        alert("Error cargando datos: " + error.message);
+    }
+}
 
         function verificarClave() {
             const ingresada = document.getElementById('txtClaveIngresada').value;
