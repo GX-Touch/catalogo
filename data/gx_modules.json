@@ -20,7 +20,8 @@
       "AppCredito": "0",
       "ConsultorP": "1",
       "VisorP": "1",
-      "AdminNor": "1"
+      "AdminNor": "1",
+      "AdminCloud": "1"
   },
 
   "3851CFFF": {
@@ -44,7 +45,8 @@
       "AppCredito": "1",
       "ConsultorP": "0",
       "VisorP": "0",
-      "AdminNor": "0"
+      "AdminNor": "0",
+      "AdminCloud": "0"
      },
 
   "8A6F118D": {
@@ -68,7 +70,8 @@
       "AppCredito": "0",
       "ConsultorP": "0",
       "VisorP": "0",
-      "AdminNor": "0"
+      "AdminNor": "0",
+      "AdminCloud": "0"
 },
 
   "2E9890C5": {
@@ -92,7 +95,8 @@
       "AppCredito": "0",
       "ConsultorP": "0",
       "VisorP": "0",
-      "AdminNor": "0"
+      "AdminNor": "0",
+      "AdminCloud": "0"
 
 },
 
@@ -117,6 +121,7 @@
       "AppCredito": "1",
       "ConsultorP": "0",
       "VisorP": "0",
-      "AdminNor": "0"
+      "AdminNor": "0",
+      "AdminCloud": "0"
   }
 }
