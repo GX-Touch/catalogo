@@ -2,12 +2,12 @@
   "rifEmpresa": "ID333333001",
   "claveAdmin": "A6BBCAD4",
   "ultimaActualizacion": "2026-08-14 00:50:09",
-  "tasaBcv": 755,16,
-  "porcentajeIva": 16,00,
+  "tasaBcv": 755.16,
+  "porcentajeIva": 16.00,
   "productos": [
     {
       "codigo": "728662221921",
-      "producto": "CASE DISCO 2.5" UNNO USB 3.0 EN3213BK",
+      "producto": "CASE DISCO 2.5 UNNO USB 3.0 EN3213BK",
       "unidad": "PIEZA",
       "categoria": "COMPUTACION",
       "pasillo": "0",
@@ -54,7 +54,7 @@
     },
     {
       "codigo": "6936103601033",
-      "producto": "CASE DISCO 2.5" EXTERNAL CASE USB 3.0 CAJA METAL",
+      "producto": "CASE DISCO 2.5 EXTERNAL CASE USB 3.0 CAJA METAL",
       "unidad": "PIEZA",
       "categoria": "COMPUTACION",
       "pasillo": "0",
