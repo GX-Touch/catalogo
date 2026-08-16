@@ -1,7 +1,7 @@
-﻿﻿{
+﻿﻿﻿{
   "rifEmpresa": "ID333333001",
   "claveAdmin": "AEC1D0D8",
-  "ultimaActualizacion": "2026-08-15 23:04:26",
+  "ultimaActualizacion": "2026-08-15 23:31:04",
   "tasaBcv": 755.16,
   "porcentajeIva": 16.00,
   "productos": [
@@ -6792,6 +6792,35 @@
       "item36": "AGOSTO 2026",
       "item48": 755.16,
       "ivaSoloDivisa": 0.16
+    }
+,
+    {
+      "codigo": "8888",
+      "producto": "PRODUCTO 8888",
+      "unidad": "LITROS",
+      "categoria": "GENERAL",
+      "pasillo": "0", "estante": "0",
+      "cantidad": 8,
+      "cantreserva": 3, "reservamax": 100,
+      "preciocompra": 6041.28,
+      "precioventa": 604.128,
+      "siiva": 1, "cheiva1": 1, "cheiva2": 0,
+      "porcen": 1.3,
+      "dola": 8,
+      "poriva": 16,
+      "montoiva": 83.328,
+      "precioiva": 520.8,
+      "precosdol": 8,
+      "preciodol": 9.28,
+      "identi": "PRODUCTOS", "usu": "ADMINISTRADOR", "item3": 1, "item": "P1",
+      "item8": 6041.28, "item11": 6041.28, "item19": 6041.28,
+      "item13": 8, "item16": 8, "item20": 8,
+      "item18": "DIVISA", "item21": "NO", "item23": "ALMACEN",
+      "item24": 8, "item26": 1.3, "item27": "NACIONAL",
+      "item31": "ACTIVO", "item32": "0", "item34": 604.128,
+      "item36": "AGOSTO 2026",
+      "item39": 520.8, "item40": 9.28,
+      "item44": 1.28, "item48": 755.16
     }
 ]
 }
