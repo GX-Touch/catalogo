@@ -1,7 +1,7 @@
-﻿{
+﻿﻿{
   "rifEmpresa": "ID333333001",
   "claveAdmin": "AEC1D0D8",
-  "ultimaActualizacion": "2026-08-15 20:09:19",
+  "ultimaActualizacion": "2026-08-15 23:04:26",
   "tasaBcv": 755.16,
   "porcentajeIva": 16.00,
   "productos": [
@@ -6773,5 +6773,25 @@
       "item44": 2.00,
       "item48": 755.16
     }
-  ]
+  ,
+    {
+      "codigo": "9999",
+      "producto": "PRODUCTO 999",
+      "unidad": "LITROS",
+      "categoria": "GENERAL",
+      "cantidad": 9,
+      "preciocompra": 755.16,
+      "precioventa": 75.516,
+      "dola": 1,
+      "precosdol": 1,
+      "porcen": 1.3,
+      "poriva": 16,
+      "montoiva": 10.416,
+      "precioiva": 65.1,
+      "preciodol": 1.16,
+      "item36": "AGOSTO 2026",
+      "item48": 755.16,
+      "ivaSoloDivisa": 0.16
+    }
+]
 }
