@@ -123,5 +123,31 @@
       "VisorP": "0",
       "AdminNor": "0",
       "AdminCloud": "0"
+
+    },
+
+  "66CC6319": {
+      "--- COMENTARIO ---": "Dayver Azocar Esquina Catedral",
+      "serialUnico": "66CC6319",
+      "nombreEmpresa": "DAYVER AZOCAR",
+      "rif": "V-261018353",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Dayver Azocar",
+      "telefono": "4120894846",
+      "correo": "dayvercopperfield@gmail.com",
+      "direccion": "Av Bolivar Cruce con calle Cumana LC-3",
+      "ciudad": "Maturín Edo. Monagas",
+      "status": "BLOQUEADO",
+      "fechaActivacion": "19/08/2026",
+      "fechaVencimiento": "21/08/2027",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0",
+      "AdminCloud": "0"
   }
 }
