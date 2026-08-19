@@ -149,5 +149,32 @@
       "VisorP": "0",
       "AdminNor": "0",
       "AdminCloud": "0"
+
+},
+
+  "86F4BAB1": {
+      "--- COMENTARIO ---": Digital Celular",
+      "serialUnico": "86F4BAB1",
+      "nombreEmpresa": "DIGITAL CELULAR BOLIVAR C.A.",
+      "rif": "J-29760581-9",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "NIidal Saryeddine",
+      "telefono": "4147650058",
+      "correo": "digitalcelularbolivar1@gmail.com",
+      "direccion": "Calle Av. Bicentenario, Edificio Morales - Piso P.B. - Local N59 - Sector Centro",
+      "ciudad": "Maturín Edo. Monagas",
+      "status": "HABILITADO",
+      "fechaActivacion": "19/08/2026",
+      "fechaVencimiento": "19/08/2027",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0",
+      "AdminCloud": "0"
+
   }
 }
