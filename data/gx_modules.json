@@ -145,8 +145,8 @@
       "Restaurante": "0",
       "Catalogo": "0",
       "AppCredito": "0",
-      "ConsultorP": "0",
-      "VisorP": "0",
+      "ConsultorP": "1",
+      "VisorP": "1",
       "AdminNor": "0",
       "AdminCloud": "0"
 
