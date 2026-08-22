@@ -176,5 +176,31 @@
       "AdminNor": "0",
       "AdminCloud": "0"
 
+},
+
+  "4296FB61": {
+      "--- COMENTARIO ---": "PANDAMOBILE",
+      "serialUnico": "4296FB61",
+      "nombreEmpresa": "PANDAMOBILE",
+      "rif": "V-20201274",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Darwis",
+      "telefono": "4140000000",
+      "correo": "DARWISFONSECA@GMAIL.COM",
+      "direccion": "Maturín Sector Centro",
+      "ciudad": "Maturín Edo. Monagas",
+      "status": "HABILITADO",
+      "fechaActivacion": "22/08/2026",
+      "fechaVencimiento": "25/08/2026",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0",
+      "AdminCloud": "0"
+
   }
 }
