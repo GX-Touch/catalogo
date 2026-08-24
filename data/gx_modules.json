@@ -202,5 +202,30 @@
       "AdminNor": "0",
       "AdminCloud": "0"
 
+    },
+
+  "4296FB61": {
+      "--- COMENTARIO ---": "THAIS",
+      "serialUnico": "4296FB61",
+      "nombreEmpresa": "Emidios",
+      "rif": "V-12455976",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Thais Colmenares",
+      "telefono": "4242064659",
+      "correo": "emidios2219@gmail.com",
+      "direccion": "Maturín Sector Centro",
+      "ciudad": "Caracas, Estado Miranda",
+      "status": "HABILITADO",
+      "fechaActivacion": "24/08/2026",
+      "fechaVencimiento": "27/08/2026",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0",
+      "AdminCloud": "0"
   }
 }
