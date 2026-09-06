@@ -236,5 +236,33 @@
       "AdminNor": "0",
       "AdminCloud": "0",
       "PrinterLabel": "0"
+
+},
+
+  "4C1CE06": {
+      "--- COMENTARIO ---": "BODEGA FRANK",
+      "serialUnico": "4C1CE06",
+      "nombreEmpresa": "Cactus Market",
+      "rif": "ID828282007",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Frank Caridad",
+      "telefono": "4249500233",
+      "correo": "correo@gmail.com",
+      "direccion": "Carrera 3 Sector 2 Local 01 Sabana Grande",
+      "ciudad": "Maturín, Monagas",
+      "status": "HABILITADO",
+      "fechaActivacion": "05/09/2026",
+      "fechaVencimiento": "05/09/2027",
+      "WhatsApp": "1",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "1",
+      "AdminNor": "0",
+      "AdminCloud": "1",
+      "PrinterLabel": "0"
+ 
   }
 }
