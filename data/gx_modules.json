@@ -290,6 +290,33 @@
       "AdminNor": "0",
       "AdminCloud": "0",
       "PrinterLabel": "0"
+
+},
+
+  "3E983B20": {
+      "--- COMENTARIO ---": "Probando en Canaima",
+      "serialUnico": "3E983B20",
+      "nombreEmpresa": "Prueba Caima",
+      "rif": "ID100100001",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Canaima Finita",
+      "telefono": "4240000000",
+      "correo": "correo@gmail.com",
+      "direccion": "Maturín Monagas",
+      "ciudad": "Maturín, Monagas",
+      "status": "HABILITADO",
+      "fechaActivacion": "12/09/2026",
+      "fechaVencimiento": "07/09/2027",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "1",
+      "VisorP": "1",
+      "AdminNor": "1",
+      "AdminCloud": "0",
+      "PrinterLabel": "0"
  
   }
 }
