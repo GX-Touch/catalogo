@@ -344,5 +344,34 @@
       "AdminNor": "0",
       "AdminCloud": "0",
       "PrinterLabel": "0"
+
+     },
+
+  "***": {
+      "--- COMENTARIO ---": "EL DESPECHO",
+      "serialUnico": "***",
+      "nombreEmpresa": "Inversiones Liz Medina Flores",
+      "rif": "V-135530693",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "Ender Medina",
+      "telefono": "4249470250",
+      "correo": "andreamariafiguera@gmail.com",
+      "direccion": "Caripito Monagas",
+      "ciudad": "Caripito, Monagas",
+      "status": "HABILITADO",
+      "fechaActivacion": "27/10/2026",
+      "fechaVencimiento": "27/10/2027",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0",
+      "AdminCloud": "0",
+      "PrinterLabel": "0"
+  }
+}
   }
 }
