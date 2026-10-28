@@ -371,6 +371,33 @@
       "AdminNor": "0",
       "AdminCloud": "0",
       "PrinterLabel": "0"
+
+    },
+
+  "000000": {
+      "--- COMENTARIO ---": "Repuestos de Motos",
+      "serialUnico": "000000",
+      "nombreEmpresa": "Emprendimiento José Cordero",
+      "rif": "J-506332493",
+      "cajaV": "CAJA 1",
+      "nombreApellido": "José Cordero",
+      "telefono": "4165698433",
+      "correo": "miguelbello154@gmail.com",
+      "direccion": "Av Madariaga-Sector La Sabana- Caripito Edo. Monagas.",
+      "ciudad": "Caripito, Monagas",
+      "status": "HABILITADO",
+      "fechaActivacion": "28/10/2026",
+      "fechaVencimiento": "28/10/2027",
+      "WhatsApp": "0",
+      "Cantina": "0",
+      "Restaurante": "0",
+      "Catalogo": "0",
+      "AppCredito": "0",
+      "ConsultorP": "0",
+      "VisorP": "0",
+      "AdminNor": "0",
+      "AdminCloud": "0",
+      "PrinterLabel": "0"
     
   }
 }
